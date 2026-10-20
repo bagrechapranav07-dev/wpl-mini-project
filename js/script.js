@@ -64,11 +64,13 @@ function setupLaptopCatalogue() {
       card.className = "product-card";
 
       // Use a placeholder background until API image loads
-      const placeholderImg = `https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=60`;
+      const placeholderImg = typeof laptopRenderDataUrl === "function"
+        ? laptopRenderDataUrl(laptop)
+        : `https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=60`;
 
       card.innerHTML = `
         ${laptop.badge ? `<span class="product-badge">${laptop.badge}</span>` : ""}
-        <div class="product-img-wrap" id="imgWrap_${laptop.id}" style="background:#f1f5f9;">
+        <div class="product-img-wrap" id="imgWrap_${laptop.id}" style="background:#ffffff;">
           <img id="img_${laptop.id}" src="${placeholderImg}" alt="${laptop.name}" style="opacity:1; transition: opacity 0.3s;">
         </div>
         <div class="product-card-body">

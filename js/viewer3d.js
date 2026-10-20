@@ -5,7 +5,7 @@
  * score bars, side-by-side compare, wishlist and keyboard controls.
  */
 (function () {
-  var DEFAULT = { rx: 16, ry: -25 };
+  var DEFAULT = { rx: 26, ry: -25 };
   var FINISHES = [
     { name: "Silver", a: "#d5dae6", b: "#a3abbd" },
     { name: "Space Gray", a: "#6b7285", b: "#3c4254" },
@@ -209,7 +209,7 @@
 
   /* ---------- 3D state ---------- */
   function draw() {
-    laptop.style.transform = "scale(" + state.zoom + ") rotateX(" + state.rx + "deg) rotateY(" + state.ry + "deg)";
+    laptop.style.transform = "scale(" + (state.zoom * 0.8) + ") rotateX(" + (-state.rx) + "deg) rotateY(" + state.ry + "deg)";
     xstack.style.transform = "scale(" + state.zoom + ") rotateX(" + clamp(40 + state.rx * 0.8, 20, 88) + "deg) rotateZ(" + (state.ry + 25) + "deg)";
   }
   function setZoom(z) {
@@ -433,6 +433,7 @@
   /* ---------- open / close ---------- */
   function open(src, name, l) {
     if (!modal) build();
+    if (l && typeof laptopScreenDataUrl === "function" && src.indexOf("tn-render") >= 0) src = laptopScreenDataUrl(l);
     current = l || null;
     renderPanel(l);
     img.src = src; titleEl.textContent = name || "3D View";

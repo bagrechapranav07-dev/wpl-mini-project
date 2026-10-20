@@ -40,6 +40,7 @@
   /* live 3D preview of the image chosen in the Add New Laptop form */
   var prev = document.getElementById("newLapPrevImg"), fileIn = document.getElementById("newLapFile"), urlIn = document.getElementById("newLapUrl");
   if (prev) {
+    if (typeof laptopScreenDataUrl === "function") prev.src = laptopScreenDataUrl({ brand: "TechNest", name: "Your new laptop" });
     prev.dataset.default = prev.src;
     if (fileIn) fileIn.addEventListener("change", function () {
       var f = fileIn.files && fileIn.files[0];

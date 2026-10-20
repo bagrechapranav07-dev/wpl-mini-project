@@ -402,16 +402,16 @@ h1,h2,h3,h4,h5 {
 .laptop-3d {
   position: relative; width: 400px; height: 262px; margin-top: -90px;
   transform-style: preserve-3d;
-  transform: rotateX(var(--rx, 16deg)) rotateY(var(--ry, -22deg));
+  transform: rotateX(calc(var(--rx, 26deg) * -1)) rotateY(var(--ry, -22deg));
   transition: transform 0.15s ease-out;
 }
 .laptop-3d.idle { animation: laptopIdle 9s ease-in-out infinite; transition: transform 0.6s ease; }
 @keyframes laptopIdle {
-  0%, 100% { transform: rotateX(16deg) rotateY(-28deg); }
-  50%      { transform: rotateX(12deg) rotateY(28deg); }
+  0%, 100% { transform: rotateX(-26deg) rotateY(-28deg); }
+  50%      { transform: rotateX(-22deg) rotateY(28deg); }
 }
 .laptop-lid {
-  position: absolute; inset: 0; transform-origin: bottom center; transform: rotateX(8deg);
+  position: absolute; inset: 0; transform-origin: bottom center; transform: rotateX(12deg);
   transform-style: preserve-3d; border-radius: 14px 14px 4px 4px;
   background: #0b0f1a; padding: 10px 10px 16px;
   box-shadow: 0 0 0 2px #2a3042, inset 0 0 0 1px #3a4258;
@@ -430,15 +430,16 @@ h1,h2,h3,h4,h5 {
 .laptop-base {
   position: absolute; left: -3%; top: 100%; width: 106%; height: 240px; transform-origin: top center;
   transform: rotateX(90deg); border-radius: 4px 4px 22px 22px;
-  background:
-    linear-gradient(#0000 0 0) center 22px / 82% 0 no-repeat,
-    repeating-linear-gradient(90deg, #1b2030 0 22px, #0d1220 22px 25px) center 18px / 84% 100px no-repeat,
-    linear-gradient(180deg, var(--ch-a, #b9c0d0), var(--ch-b, #8991a6));
+  background: linear-gradient(180deg, var(--ch-a, #b9c0d0), var(--ch-b, #8991a6));
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35), 0 2px 0 #5d6578;
 }
-.laptop-base::after { /* trackpad */
-  content: ""; position: absolute; left: 50%; bottom: 22px; width: 34%; height: 60px; transform: translateX(-50%);
-  border-radius: 8px; background: linear-gradient(180deg, #a2a9bb, #99a0b3); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15);
+.laptop-base::before { /* keyboard (upper part of the deck, next to the screen hinge) */
+  content: ""; position: absolute; left: 7%; top: 16px; width: 86%; height: 118px; border-radius: 6px;
+  background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20118%22%20preserveAspectRatio%3D%22none%22%3E%3Crect%20width%3D%22300%22%20height%3D%22118%22%20rx%3D%226%22%20fill%3D%22%230b1020%22%2F%3E%3Cg%20fill%3D%22%232b3348%22%3E%3Crect%20x%3D%224.0%22%20y%3D%223%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2225.1%22%20y%3D%223%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2246.1%22%20y%3D%223%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2267.2%22%20y%3D%223%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2288.3%22%20y%3D%223%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22109.4%22%20y%3D%223%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22130.4%22%20y%3D%223%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22151.5%22%20y%3D%223%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22172.6%22%20y%3D%223%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22193.6%22%20y%3D%223%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22214.7%22%20y%3D%223%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22235.8%22%20y%3D%223%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22256.9%22%20y%3D%223%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22277.9%22%20y%3D%223%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%224.0%22%20y%3D%2221%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2225.1%22%20y%3D%2221%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2246.1%22%20y%3D%2221%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2267.2%22%20y%3D%2221%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2288.3%22%20y%3D%2221%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22109.4%22%20y%3D%2221%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22130.4%22%20y%3D%2221%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22151.5%22%20y%3D%2221%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22172.6%22%20y%3D%2221%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22193.6%22%20y%3D%2221%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22214.7%22%20y%3D%2221%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22235.8%22%20y%3D%2221%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22256.9%22%20y%3D%2221%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22277.9%22%20y%3D%2221%22%20width%3D%2218.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%228.0%22%20y%3D%2239%22%20width%3D%2219.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2230.1%22%20y%3D%2239%22%20width%3D%2219.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2252.2%22%20y%3D%2239%22%20width%3D%2219.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2274.2%22%20y%3D%2239%22%20width%3D%2219.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2296.3%22%20y%3D%2239%22%20width%3D%2219.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22118.4%22%20y%3D%2239%22%20width%3D%2219.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22140.5%22%20y%3D%2239%22%20width%3D%2219.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22162.5%22%20y%3D%2239%22%20width%3D%2219.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22184.6%22%20y%3D%2239%22%20width%3D%2219.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22206.7%22%20y%3D%2239%22%20width%3D%2219.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22228.8%22%20y%3D%2239%22%20width%3D%2219.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22250.8%22%20y%3D%2239%22%20width%3D%2219.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22272.9%22%20y%3D%2239%22%20width%3D%2219.1%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2212.0%22%20y%3D%2257%22%20width%3D%2220.2%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2235.2%22%20y%3D%2257%22%20width%3D%2220.2%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2258.5%22%20y%3D%2257%22%20width%3D%2220.2%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2281.8%22%20y%3D%2257%22%20width%3D%2220.2%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22105.0%22%20y%3D%2257%22%20width%3D%2220.2%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22128.2%22%20y%3D%2257%22%20width%3D%2220.2%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22151.5%22%20y%3D%2257%22%20width%3D%2220.2%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22174.8%22%20y%3D%2257%22%20width%3D%2220.2%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22198.0%22%20y%3D%2257%22%20width%3D%2220.2%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22221.2%22%20y%3D%2257%22%20width%3D%2220.2%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22244.5%22%20y%3D%2257%22%20width%3D%2220.2%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22267.8%22%20y%3D%2257%22%20width%3D%2220.2%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2218.0%22%20y%3D%2275%22%20width%3D%2223.7%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2244.7%22%20y%3D%2275%22%20width%3D%2223.7%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2271.4%22%20y%3D%2275%22%20width%3D%2223.7%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2298.1%22%20y%3D%2275%22%20width%3D%2223.7%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22124.8%22%20y%3D%2275%22%20width%3D%2223.7%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22151.5%22%20y%3D%2275%22%20width%3D%2223.7%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22178.2%22%20y%3D%2275%22%20width%3D%2223.7%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22204.9%22%20y%3D%2275%22%20width%3D%2223.7%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22231.6%22%20y%3D%2275%22%20width%3D%2223.7%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%22258.3%22%20y%3D%2275%22%20width%3D%2223.7%22%20height%3D%2215%22%20rx%3D%222.5%22%2F%3E%3Crect%20x%3D%2270%22%20y%3D%2293%22%20width%3D%22160%22%20height%3D%2213%22%20rx%3D%222.5%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") center / 100% 100% no-repeat; box-shadow: 0 0 0 2px rgba(0,0,0,0.25);
+}
+.laptop-base::after { /* trackpad (front of the deck, below the keyboard) */
+  content: ""; position: absolute; left: 50%; top: 150px; width: 34%; height: 62px; transform: translateX(-50%);
+  border-radius: 8px; background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(0,0,0,0.08)); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25);
 }
 .laptop-shadow {
   position: absolute; left: 50%; top: 100%; width: 110%; height: 240px; transform: translate(-50%, 0) rotateX(90deg) translateZ(-14px);
@@ -786,7 +787,7 @@ h1,h2,h3,h4,h5 {
 }
 .product-img-wrap img {
   width: 100%; height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.4s cubic-bezier(.4,0,.2,1);
 }
 .product-card:hover .product-img-wrap img { transform: scale(1.06); }
@@ -1469,13 +1470,13 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 .v3d-close { position: absolute; top: 10px; right: 14px; background: none; border: 0; color: #fff; font-size: 2rem; cursor: pointer; line-height: 1; }
 .v3d-stage { height: 400px; perspective: 1600px; display: flex; align-items: center; justify-content: center; cursor: grab; touch-action: none; overflow: hidden; }
 .v3d-stage:active { cursor: grabbing; }
-.v3d-laptop { margin-top: -90px; transition: none; transform-origin: center 70%; }
+.v3d-laptop { margin-top: -110px; transition: none; transform-origin: center 55%; }
 .v3d-controls { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; align-items: center; margin-top: 0.5rem; }
 .v3d-btn { padding: 0.5rem 1rem; border-radius: 999px; border: 1px solid #475569; background: transparent; color: #fff; font-weight: 600; cursor: pointer; }
 .v3d-btn.active { background: #3b82f6; border-color: #3b82f6; }
 .v3d-zoom { font-size: 0.85rem; display: flex; gap: 0.5rem; align-items: center; }
 .v3d-hint { text-align: center; font-size: 0.78rem; color: #94a3b8; margin-top: 0.5rem; }
-@media (max-width: 480px) { .v3d-laptop { margin-top: -90px; } .v3d-stage { height: 320px; } }
+@media (max-width: 480px) { .v3d-laptop { margin-top: -150px; } .v3d-stage { height: 320px; } }
 
 /* 3D viewer: specs panel */
 .v3d-box { width: min(1040px, 100%); max-height: 94vh; overflow-y: auto; }
@@ -1561,7 +1562,7 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 .v3d-modal.open .v3d-box { animation: popIn 0.45s cubic-bezier(.2,.9,.3,1.2); }
 @keyframes fadeIn { from { opacity: 0; } }
 .v3d-laptop.opening .laptop-lid { animation: lidOpen 1.3s cubic-bezier(.3,.8,.3,1) both; }
-@keyframes lidOpen { from { transform: rotateX(-88deg); } to { transform: rotateX(8deg); } }
+@keyframes lidOpen { from { transform: rotateX(-88deg); } to { transform: rotateX(12deg); } }
 .v3d-specs tr { animation: fadeUp 0.5s both; }
 .v3d-specs tr:nth-child(2) { animation-delay: .05s; } .v3d-specs tr:nth-child(3) { animation-delay: .1s; }
 .v3d-specs tr:nth-child(4) { animation-delay: .15s; } .v3d-specs tr:nth-child(5) { animation-delay: .2s; }
