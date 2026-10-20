@@ -118,7 +118,10 @@ function setupLaptopCatalogue() {
 
   // Initial render
   if (isHomePage) {
-    renderLaptops(LAPTOPS.slice(0, 4));
+    // Admin-added laptops (id >= 1000) lead the home page, newest first
+    const added = LAPTOPS.filter(l => l.id >= 1000).reverse();
+    const base = LAPTOPS.filter(l => l.id < 1000);
+    renderLaptops(added.concat(base).slice(0, 4));
     return;
   }
 

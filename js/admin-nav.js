@@ -36,4 +36,16 @@
   btn.className = "admin-menu-btn"; btn.innerHTML = "&#9776; Menu";
   btn.onclick = function () { document.getElementById("adminSidebar").classList.toggle("open"); };
   document.querySelector(".admin-main").prepend(btn);
+
+  /* live 3D preview of the image chosen in the Add New Laptop form */
+  var prev = document.getElementById("newLapPrevImg"), fileIn = document.getElementById("newLapFile"), urlIn = document.getElementById("newLapUrl");
+  if (prev) {
+    prev.dataset.default = prev.src;
+    if (fileIn) fileIn.addEventListener("change", function () {
+      var f = fileIn.files && fileIn.files[0];
+      if (!f || !f.type.startsWith("image/")) { prev.src = prev.dataset.default; return; }
+      var r = new FileReader(); r.onload = function () { prev.src = r.result; }; r.readAsDataURL(f);
+    });
+    if (urlIn) urlIn.addEventListener("change", function () { if (urlIn.value.trim()) prev.src = urlIn.value.trim(); });
+  }
 })();

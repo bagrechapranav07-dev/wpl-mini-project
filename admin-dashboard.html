@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard & Customer Responses - TechNest</title>
-  <link rel="stylesheet" href="css/style.css?v=14">
+  <link rel="stylesheet" href="css/style.css?v=15">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 1 1%27%3E%3C/svg%3E">
 </head>
 <body id="adminDashboardView">
@@ -148,6 +148,21 @@
         <div class="form-group">
           <label>Description</label>
           <textarea name="description" class="form-control" placeholder="Short product description shown on the storefront..."></textarea>
+        </div>
+        <div class="newlap-image-row">
+          <div class="form-group" style="flex:1; min-width:240px;">
+            <label>Laptop Image</label>
+            <input type="file" name="imageFile" id="newLapFile" accept="image/*" class="form-control">
+            <input type="text" name="imageUrl" id="newLapUrl" class="form-control" style="margin-top:0.5rem;" placeholder="...or paste an image URL">
+            <small style="color:#64748b;">Upload a photo (under 1.5 MB) or paste a link. It appears on the home page and catalogue and opens in the 3D viewer. Leave empty to auto-fetch a photo.</small>
+          </div>
+          <div class="newlap-preview">
+            <div class="laptop-3d idle">
+              <div class="laptop-shadow"></div><div class="laptop-base"></div>
+              <div class="laptop-lid"><img id="newLapPrevImg" alt="Preview" src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=600&q=70"></div>
+            </div>
+            <span>Live 3D preview</span>
+          </div>
         </div>
         <button type="submit" class="btn btn-primary">Add Laptop</button>
       </form>
@@ -310,7 +325,7 @@
 
   <script src="js/data.js?v=3"></script>
   <script src="js/api-images.js?v=4"></script>
-  <script src="js/admin.js?v=4"></script>
-  <script src="js/admin-nav.js?v=1"></script>
+  <script src="js/admin.js?v=5"></script>
+  <script src="js/admin-nav.js?v=2"></script>
 </body>
 </html>

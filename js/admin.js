@@ -218,15 +218,45 @@ function addNewLaptopToStore(event) {
     description: val("description") || `${brand} ${name} — the newest addition to the TechNest lineup.`
   };
 
-  customLaptops.push(newLaptop);
-  localStorage.setItem(CUSTOM_LAPTOPS_KEY, JSON.stringify(customLaptops));
+  const finish = (imageUrl) => {
+    customLaptops.push(newLaptop);
+    localStorage.setItem(CUSTOM_LAPTOPS_KEY, JSON.stringify(customLaptops));
 
-  // Reflect immediately on this page too
-  if (!LAPTOPS.find(l => l.id === newLaptop.id)) LAPTOPS.push(newLaptop);
+    // Reflect immediately on this page too
+    if (!LAPTOPS.find(l => l.id === newLaptop.id)) LAPTOPS.push(newLaptop);
 
-  renderAdminLaptopPricingTable();
-  form.reset();
-  showToastNotification(`"${newLaptop.name}" added — now live on the home page and catalogue.`);
+    let imageSaved = true;
+    if (imageUrl) {
+      const overrides = getImageOverrides();
+      overrides[newLaptop.id] = imageUrl;
+      try {
+        localStorage.setItem(IMAGE_OVERRIDES_KEY, JSON.stringify(overrides));
+        newLaptop.apiImage = imageUrl;
+      } catch (e) {
+        imageSaved = false;
+      }
+    }
+
+    renderAdminLaptopPricingTable();
+    form.reset();
+    const prev = document.getElementById("newLapPrevImg");
+    if (prev && prev.dataset.default) prev.src = prev.dataset.default;
+    showToastNotification(imageSaved
+      ? `"${newLaptop.name}" added with its image — now live on the home page, catalogue and 3D viewer.`
+      : `"${newLaptop.name}" added, but the image was too large for browser storage — try a smaller photo.`);
+  };
+
+  const file = form.querySelector('[name="imageFile"]')?.files?.[0];
+  const pastedUrl = val("imageUrl");
+  if (file) {
+    if (!file.type.startsWith("image/")) { alert("Please choose an image file."); return; }
+    if (file.size > 1.5 * 1024 * 1024) { alert("Please choose an image under 1.5MB."); return; }
+    const reader = new FileReader();
+    reader.onload = () => finish(reader.result);
+    reader.readAsDataURL(file);
+  } else {
+    finish(pastedUrl);
+  }
 }
 
 function getImageOverrides() {
