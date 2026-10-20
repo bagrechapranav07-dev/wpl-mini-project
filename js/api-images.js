@@ -192,10 +192,39 @@ function _lapScreenMarkup(l, w, h, uid) {
   return `<defs><linearGradient id="${uid}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${th.a}"/><stop offset=".55" stop-color="${th.b}"/><stop offset="1" stop-color="${th.c}"/></linearGradient></defs>` +
     `<rect width="${w}" height="${h}" fill="url(#${uid}g)"/>` +
     `<circle cx="${w * 0.82}" cy="${h * 0.22}" r="${h * 0.32}" fill="rgba(255,255,255,0.14)"/><circle cx="${w * 0.12}" cy="${h * 0.95}" r="${h * 0.4}" fill="rgba(255,255,255,0.08)"/>` +
-    `<text x="${w * 0.08}" y="${h * 0.3}" font-family="Arial,sans-serif" font-weight="800" font-size="${22 * k}" letter-spacing="${3 * k}" fill="rgba(255,255,255,0.85)">${brand}</text>` +
+    `<svg x="${w * 0.06}" y="${h * 0.06}" width="${w * 0.24}" height="${w * 0.12}" viewBox="0 0 120 60" overflow="visible">${laptopBrandLogoMarkup(l.brand || "TechNest")}</svg>` +
     `<text x="${w * 0.08}" y="${h * 0.52}" font-family="Arial,sans-serif" font-weight="800" font-size="${(name.length > 22 ? 25 : name.length > 16 ? 33 : 42) * k}" fill="#fff">${name}</text>` +
     `<text x="${w * 0.08}" y="${h * 0.68}" font-family="Arial,sans-serif" font-size="${19 * k}" fill="rgba(255,255,255,0.9)">${line1}</text>` +
     `<rect x="${w * 0.08}" y="${h * 0.78}" width="${w * 0.2}" height="${5 * k}" rx="${3 * k}" fill="rgba(255,255,255,0.7)"/>`;
+}
+
+/**
+ * Simple brand marks (drawn wordmarks / symbols, white with a dark outline so they read on any finish).
+ * Returns SVG markup for a 120 x 60 box.
+ */
+function laptopBrandLogoMarkup(brand) {
+  const b = String(brand || "").toLowerCase();
+  const st = 'fill="#fff" stroke="#0f172a" stroke-width="1.6" paint-order="stroke" stroke-linejoin="round"';
+  const text = (s, size, extra) => `<text x="60" y="38" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="${size}" ${extra || ""} ${st}>${_lapEsc(s)}</text>`;
+  if (b === "dell") return `<circle cx="60" cy="30" r="25" fill="none" stroke="#fff" stroke-width="5"/><circle cx="60" cy="30" r="27.5" fill="none" stroke="#0f172a" stroke-width="1.2"/><text x="60" y="37" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="15" ${st}>DELL</text>`;
+  if (b === "hp") return `<circle cx="60" cy="30" r="26" fill="#fff" stroke="#0f172a" stroke-width="1.6"/><text x="60" y="41" text-anchor="middle" font-family="Arial,sans-serif" font-style="italic" font-weight="900" font-size="32" fill="#0f172a">hp</text>`;
+  if (b === "apple") return `<g stroke="#0f172a" stroke-width="1.6" paint-order="stroke" fill="#fff"><path d="M60 22c-6-5-17-3-20 6-4 12 4 28 12 29 3 0 5-2 8-2s5 2 8 2c6-1 13-14 11-22-5 1-9-3-9-9-3-3-7-4-10-4z"/><path d="M62 18c1-5 5-8 9-8 0 5-3 9-9 8z"/></g>`;
+  if (b === "lenovo") return text("Lenovo", 27);
+  if (b === "asus") return text("ASUS", 29, 'letter-spacing="2"');
+  if (b === "acer") return text("acer", 31);
+  if (b === "msi") return text("MSI", 32, 'font-style="italic"');
+  if (b === "technest") return text("TechNest", 21);
+  const name = String(brand || "Laptop").slice(0, 9);
+  return text(name, name.length > 6 ? 18 : 24);
+}
+
+function laptopBrandLogoDataUrl(brand) {
+  return _lapDataUrl(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60">${laptopBrandLogoMarkup(brand)}</svg>`);
+}
+
+// Put the right brand logo on the back cover of every 3D laptop on the page
+function applyBrandLogoToLaptop(el, brand) {
+  if (el) el.style.setProperty("--logo", `url("${laptopBrandLogoDataUrl(brand)}")`);
 }
 
 function _lapDataUrl(svg) {
@@ -247,6 +276,7 @@ function laptopRenderDataUrl(l) {
 
 // Home-page hero laptop gets the generic TechNest screen instead of a random stock photo
 document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".laptop-3d").forEach(el => applyBrandLogoToLaptop(el, "TechNest"));
   const heroImg = document.querySelector(".hero-img-panel .laptop-lid img");
   if (heroImg) heroImg.src = laptopScreenDataUrl({ brand: "TechNest", name: "Premium Laptops", processor: "Apple · Dell · HP · Lenovo · ASUS" });
 });

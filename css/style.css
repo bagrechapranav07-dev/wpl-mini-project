@@ -422,9 +422,8 @@ h1,h2,h3,h4,h5 {
   background: linear-gradient(115deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 40%);
 }
 .laptop-lid::after { /* back cover */
-  content: "TechNest"; position: absolute; inset: 0; border-radius: inherit;
-  background: linear-gradient(135deg, var(--ch-b, #4b5368), var(--ch-a, #2a3042)); color: rgba(255,255,255,0.5);
-  display: flex; align-items: center; justify-content: center; font-weight: 800; letter-spacing: 2px;
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  background: var(--logo, none) center / 38% auto no-repeat, linear-gradient(135deg, var(--ch-b, #4b5368), var(--ch-a, #2a3042));
   transform: rotateY(180deg) translateZ(2px); backface-visibility: hidden;
 }
 .laptop-base {

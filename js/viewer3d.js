@@ -435,6 +435,7 @@
     if (!modal) build();
     if (l && typeof laptopScreenDataUrl === "function" && src.indexOf("tn-render") >= 0) src = laptopScreenDataUrl(l);
     current = l || null;
+    if (typeof applyBrandLogoToLaptop === "function") applyBrandLogoToLaptop(laptop, l ? l.brand : "TechNest");
     renderPanel(l);
     img.src = src; titleEl.textContent = name || "3D View";
     laptop.classList.remove("screen-off", "show-hs");
