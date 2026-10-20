@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard & Customer Responses - TechNest</title>
+  <link rel="stylesheet" href="css/style.css?v=5">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 1 1%27%3E%3C/svg%3E">
+</head>
+<body id="adminDashboardView">
+
+  <!-- Admin Dashboard Header -->
+  <header class="admin-dashboard-header">
+    <div class="container admin-header-flex">
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <a href="index.html" class="logo" style="color:#ffffff;">
+          <div class="logo-icon" style="width:30px;height:30px;font-size:0.85rem;">💻</div>
+          Tech<span style="color:#60a5fa;">Nest</span>
+        </a>
+        <span style="background: #334155; color: #93c5fd; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">ADMIN DASHBOARD</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <a href="index.html" class="btn btn-outline btn-sm" style="color: #ffffff; border-color: #475569; background: transparent;">View Storefront</a>
+        <button class="btn btn-primary btn-sm" onclick="performAdminLogout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="margin-bottom: 3rem;">
+
+    <!-- Top Action Bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1 style="font-size: 1.8rem; color: #1e293b;">Customer Responses & Store Analytics</h1>
+        <p style="color: #64748b; font-size: 0.95rem;">View live orders submitted through Amazon Pay gateway, inquiries, and repair bookings.</p>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="clearAllAdminResponses()" style="color: #ef4444; border-color: #fca5a5;">
+        Reset Demo Responses Data
+      </button>
+    </div>
+
+    <!-- Analytics Key Metrics Grid -->
+    <div class="admin-metrics-grid">
+      <div class="metric-card">
+        <div class="metric-card-title">Total Revenue</div>
+        <div class="metric-card-value" id="metricTotalRevenue" style="color: #16a34a;">₹0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-card-title">Customer Orders</div>
+        <div class="metric-card-value" id="metricTotalOrders" style="color: #2563eb;">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-card-title">Contact Inquiries</div>
+        <div class="metric-card-value" id="metricTotalMessages" style="color: #d97706;">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-card-title">Service / Repairs</div>
+        <div class="metric-card-value" id="metricTotalRepairs" style="color: #0284c7;">0</div>
+      </div>
+    </div>
+
+    <!-- 0a. Add New Laptop -->
+    <div style="margin-bottom: 2.5rem;">
+      <h2 style="font-size: 1.3rem; color: #1e293b; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
+        ➕ Add New Laptop
+      </h2>
+      <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem;">
+        Fill in the specs and submit — it appears instantly on the home page and catalogue below, with its photo auto-fetched the same way as every other laptop.
+      </p>
+
+      <form id="addLaptopForm" onsubmit="addNewLaptopToStore(event)" class="checkout-step-card" style="margin-bottom:0;">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:1rem;">
+          <div class="form-group">
+            <label>Name *</label>
+            <input type="text" name="name" class="form-control" required placeholder="e.g. Dell Vostro 15">
+          </div>
+          <div class="form-group">
+            <label>Brand *</label>
+            <input type="text" name="brand" class="form-control" required placeholder="e.g. Dell">
+          </div>
+          <div class="form-group">
+            <label>Processor *</label>
+            <input type="text" name="processor" class="form-control" required placeholder="e.g. Intel Core i5">
+          </div>
+          <div class="form-group">
+            <label>RAM (GB) *</label>
+            <input type="number" name="ram" class="form-control" required min="4" placeholder="16">
+          </div>
+          <div class="form-group">
+            <label>Storage (GB) *</label>
+            <input type="number" name="storage" class="form-control" required min="128" placeholder="512">
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select name="category" class="form-control">
+              <option value="Business">Business</option>
+              <option value="Ultrabook">Ultrabook</option>
+              <option value="Professional">Professional</option>
+              <option value="Gaming">Gaming</option>
+              <option value="Student">Student</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Selling Price (₹) *</label>
+            <input type="number" name="price" class="form-control" required min="1" placeholder="59990">
+          </div>
+          <div class="form-group">
+            <label>MRP (₹)</label>
+            <input type="number" name="originalPrice" class="form-control" min="1" placeholder="69990">
+          </div>
+          <div class="form-group">
+            <label>Display Size</label>
+            <input type="text" name="displaySize" class="form-control" placeholder='15.6"'>
+          </div>
+          <div class="form-group">
+            <label>Operating System</label>
+            <select name="os" class="form-control">
+              <option value="Windows 11">Windows 11</option>
+              <option value="macOS">macOS</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Badge</label>
+            <input type="text" name="badge" class="form-control" placeholder="New Arrival">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea name="description" class="form-control" placeholder="Short product description shown on the storefront..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Laptop</button>
+      </form>
+    </div>
+
+    <!-- 0. Laptop Pricing & Discount Management -->
+    <div style="margin-bottom: 2.5rem;">
+      <h2 style="font-size: 1.3rem; color: #1e293b; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
+        💰 Manage Laptop Pricing &amp; Discounts
+      </h2>
+      <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem;">
+        Edit MRP, selling price or discount % below and click Save — changes go live instantly on the home page, catalogue, cart and checkout. Delete removes a laptop from the storefront (it can be restored anytime).
+      </p>
+
+      <div class="data-table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Laptop</th>
+              <th>MRP (₹)</th>
+              <th>Selling Price (₹)</th>
+              <th>Discount</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="adminLaptopPricingTableBody">
+            <!-- Rendered dynamically by js/admin.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 0b. Removed Laptops (only shown when at least one laptop has been deleted) -->
+    <div id="adminDeletedLaptopsSection" style="margin-bottom: 2.5rem; display: none;">
+      <h2 style="font-size: 1.1rem; color: #1e293b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+        🗑️ Removed Laptops
+      </h2>
+      <div class="data-table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Laptop</th>
+              <th style="text-align:right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="adminDeletedLaptopsTableBody">
+            <!-- Rendered dynamically by js/admin.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 1. Customer Amazon Pay Orders Section -->
+    <div style="margin-bottom: 2.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+        <h2 style="font-size: 1.3rem; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+          🛒 Customer Orders & Amazon Pay Transactions
+        </h2>
+        <div style="width: 280px;">
+          <input type="text" id="adminOrderSearch" class="form-control" placeholder="Search order ID, customer name..." oninput="renderAdminOrdersTable()">
+        </div>
+      </div>
+
+      <div class="data-table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Items Purchased</th>
+              <th>Total Amount</th>
+              <th>Payment Method</th>
+              <th>Order Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="adminOrdersTableBody">
+            <!-- Rendered dynamically by js/admin.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 2. Contact Inquiries Section -->
+    <div style="margin-bottom: 2.5rem;">
+      <h2 style="font-size: 1.3rem; color: #1e293b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+        ✉️ Customer Contact Inquiries
+      </h2>
+      <div class="data-table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date & Time</th>
+              <th>Customer Name</th>
+              <th>Subject</th>
+              <th>Message</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="adminMessagesTableBody">
+            <!-- Rendered dynamically by js/admin.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3. Service & Repair Bookings Section -->
+    <div style="margin-bottom: 2.5rem;">
+      <h2 style="font-size: 1.3rem; color: #1e293b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+        🛠️ Laptop Repair & Service Bookings
+      </h2>
+      <div class="data-table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date & Time</th>
+              <th>Customer Contact</th>
+              <th>Laptop Model</th>
+              <th>Issue Type</th>
+              <th>Problem Description</th>
+            </tr>
+          </thead>
+          <tbody id="adminRepairsTableBody">
+            <!-- Rendered dynamically by js/admin.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Admin View Order Detail Modal -->
+  <div class="modal" id="adminOrderModal">
+    <div class="modal-content" style="max-width: 520px;">
+      <span class="close-modal" onclick="closeAdminModal()">&times;</span>
+      <div id="adminModalBody">
+        <!-- Rendered dynamically -->
+      </div>
+      <div style="margin-top: 1.2rem; text-align: right;">
+        <button class="btn btn-outline" onclick="closeAdminModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js?v=3"></script>
+  <script src="js/api-images.js?v=4"></script>
+  <script src="js/admin.js?v=4"></script>
+</body>
+</html>

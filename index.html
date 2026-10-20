@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechNest — Premium Laptop Store</title>
+  <meta name="description"
+    content="TechNest is your destination for premium multi-brand laptops. Shop Apple, Dell, HP, Lenovo, ASUS & more with smart filters, fast checkout and expert support.">
+  <link rel="stylesheet" href="css/style.css?v=7">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 1 1%27%3E%3C/svg%3E">
+</head>
+
+<body>
+
+  <!-- Header Navigation -->
+  <header class="header">
+    <div class="container navbar">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">💻</div>
+        Tech<span>Nest</span>
+      </a>
+      <button class="hamburger" id="navToggle">&#9776;</button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="laptops.html">Laptops</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li>
+          <a href="cart.html" class="header-cart-link">
+            <svg class="cart-icon-svg" viewBox="0 0 24 24">
+              <path
+                d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" />
+            </svg>
+            Cart <span class="cart-badge-count">0</span>
+          </a>
+        </li>
+        <li><a href="admin-login.html" class="admin-nav-btn">Admin</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <div class="hero-badge">
+          <span>✦</span> Trusted Laptop Store Since 2020
+        </div>
+        <h1>Find Your Perfect <span class="highlight">Laptop</span> Today</h1>
+        <p>Browse India's finest collection of genuine laptops from Apple, Dell, HP, Lenovo, ASUS and more — with smart
+          filters, real specs, and fast delivery.</p>
+        <div class="hero-btns">
+          <a href="laptops.html" class="btn btn-accent btn-lg">Browse All Laptops →</a>
+          <a href="about.html" class="btn btn-outline btn-lg">About Us</a>
+        </div>
+        <div class="hero-stats">
+          <div>
+            <div class="hero-stat-num">120+</div>
+            <div class="hero-stat-label">Laptop Models</div>
+          </div>
+          <div>
+            <div class="hero-stat-num">8k+</div>
+            <div class="hero-stat-label">Happy Customers</div>
+          </div>
+          <div>
+            <div class="hero-stat-num">6</div>
+            <div class="hero-stat-label">Top Brands</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-img-panel">
+        <div class="laptop-3d idle" id="heroTilt">
+          <div class="laptop-shadow"></div>
+          <div class="laptop-base"></div>
+          <div class="laptop-lid">
+            <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=800&q=80"
+              alt="Premium Laptops at TechNest">
+          </div>
+        </div>
+        <div class="hero-floating-badge top-right"><span>⭐</span> 4.8/5 Rating</div>
+        <div class="hero-floating-badge bottom-left">🚀 Free Delivery Available</div>
+      </div>
+      <script>
+        (function () {
+          var panel = document.querySelector('.hero-img-panel');
+          var el = document.getElementById('heroTilt');
+          if (!panel || !el) return;
+          panel.addEventListener('mousemove', function (e) {
+            var r = panel.getBoundingClientRect();
+            var x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+            el.classList.remove('idle');
+            el.style.setProperty('--ry', ((x - 0.5) * 70).toFixed(1) + 'deg');
+            el.style.setProperty('--rx', (16 + (0.5 - y) * 24).toFixed(1) + 'deg');
+          });
+          panel.addEventListener('mouseleave', function () {
+            el.style.setProperty('--rx', '16deg');
+            el.style.setProperty('--ry', '-22deg');
+            setTimeout(function () { el.classList.add('idle'); }, 600);
+          });
+        })();
+      </script>
+    </div>
+  </section>
+
+  <!-- Why TechNest -->
+  <section class="section container">
+    <div class="text-center mb-4">
+      <h2 class="section-title">Why Shop at TechNest?</h2>
+      <p class="section-subtitle">We make laptop buying simple, genuine, and stress-free.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>100% Genuine Products</h3>
+        <p>All laptops are brand-authorized with original warranty, invoice and box.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💳</div>
+        <h3>Flexible Payment</h3>
+        <p>Pay via UPI, Net Banking, Credit/Debit Card or Cash on Delivery — your choice.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🛠️</div>
+        <h3>Expert Repair Services</h3>
+        <p>Chip-level repairs, screen replacements and upgrades by certified technicians.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🚀</div>
+        <h3>Fast Delivery</h3>
+        <p>Pan-India delivery within 3–5 business days, free on orders above ₹30,000.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Laptops -->
+  <section class="section container">
+    <div class="flex items-center justify-between mb-3">
+      <div>
+        <h2 class="section-title">Featured Laptops</h2>
+        <p class="section-subtitle" style="margin-bottom:0;">Handpicked top deals for every need & budget.</p>
+      </div>
+      <a href="laptops.html" class="btn btn-outline" style="flex-shrink:0;">View All →</a>
+    </div>
+    <div class="products-grid" id="laptopGrid"></div>
+    <div class="text-center mt-4">
+      <a href="laptops.html" class="btn btn-primary btn-lg">Browse All Laptops with Filters →</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="footer-logo-desc">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">💻</div>
+          Tech<span>Nest</span>
+        </a>
+        <p>Your complete destination for premium multi-brand laptops, genuine accessories and expert repair services.
+          Shop with confidence.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="laptops.html">Laptop Catalogue</a></li>
+          <li><a href="cart.html">Shopping Cart</a></li>
+          <li><a href="services.html">Repair Services</a></li>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Brands We Carry</h4>
+        <ul>
+          <li><a href="laptops.html">Apple MacBook</a></li>
+          <li><a href="laptops.html">Dell XPS & Inspiron</a></li>
+          <li><a href="laptops.html">HP Pavilion & Victus</a></li>
+          <li><a href="laptops.html">Lenovo IdeaPad</a></li>
+          <li><a href="laptops.html">ASUS ROG & Vivobook</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Store Info</h4>
+        <p>📍 102 Tech Plaza, MG Road, Bengaluru</p>
+        <p>📞 +91 98765 43210</p>
+        <p>✉️ support@technest.in</p>
+        <p>🕒 Mon–Sat: 10 AM – 8 PM</p>
+      </div>
+    </div>
+    <div class="footer-bottom container">
+      <p>&copy; 2026 TechNest Laptop Store. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/data.js?v=3"></script>
+  <script src="js/api-images.js?v=4"></script>
+  <script src="js/cart.js?v=2"></script>
+  <script src="js/admin.js?v=4"></script>
+  <script src="js/script.js?v=2"></script>
+  <script src="js/viewer3d.js?v=2"></script>
+</body>
+
+</html>

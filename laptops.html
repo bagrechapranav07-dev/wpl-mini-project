@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laptop Catalogue — TechNest Store</title>
+  <meta name="description" content="Browse 100+ genuine laptops at TechNest. Filter by brand, processor, RAM, price and usage type. Best deals on Apple, Dell, HP, Lenovo, ASUS & Acer.">
+  <link rel="stylesheet" href="css/style.css?v=7">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 1 1%27%3E%3C/svg%3E">
+</head>
+<body>
+
+  <!-- Header Navigation -->
+  <header class="header">
+    <div class="container navbar">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">💻</div>
+        Tech<span>Nest</span>
+      </a>
+      <button class="hamburger" id="navToggle">&#9776;</button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="laptops.html" class="active">Laptops</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li>
+          <a href="cart.html" class="header-cart-link">
+            <svg class="cart-icon-svg" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            Cart <span class="cart-badge-count">0</span>
+          </a>
+        </li>
+        <li><a href="admin-login.html" class="admin-nav-btn">Admin</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- Page Banner -->
+  <div class="page-banner">
+    <div class="container">
+      <h1>Laptop Catalogue</h1>
+      <p>Find your ideal laptop — filter by brand, processor, RAM, price & use case.</p>
+    </div>
+  </div>
+
+  <main class="container section-sm">
+    <!-- 2-Column Catalogue Layout -->
+    <div class="catalogue-container">
+
+      <!-- Left Filter Sidebar -->
+      <aside class="filter-sidebar">
+        <div class="filter-header">
+          <h3>🔍 Filters</h3>
+          <button class="clear-filter-btn" id="clearFiltersBtn">Clear All</button>
+        </div>
+
+        <!-- 1. Use Case / Category -->
+        <div class="filter-group">
+          <div class="filter-group-title">Use Case / Type</div>
+          <div class="filter-options-list">
+            <label class="filter-checkbox-label"><input type="checkbox" name="categoryFilter" value="Student"> Student &amp; Basic</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="categoryFilter" value="Business"> Business &amp; Office</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="categoryFilter" value="Professional"> Professional / Creative</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="categoryFilter" value="Gaming"> Gaming &amp; Performance</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="categoryFilter" value="Ultrabook"> Ultrabook / Thin &amp; Light</label>
+          </div>
+        </div>
+
+        <!-- 2. Brand -->
+        <div class="filter-group">
+          <div class="filter-group-title">Brand</div>
+          <div class="filter-options-list">
+            <label class="filter-checkbox-label"><input type="checkbox" name="brandFilter" value="Apple"> Apple</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="brandFilter" value="Dell"> Dell</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="brandFilter" value="HP"> HP</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="brandFilter" value="Lenovo"> Lenovo</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="brandFilter" value="ASUS"> ASUS</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="brandFilter" value="Acer"> Acer</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="brandFilter" value="MSI"> MSI</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="brandFilter" value="TechNest"> TechNest</label>
+          </div>
+        </div>
+
+        <!-- 3. Processor -->
+        <div class="filter-group">
+          <div class="filter-group-title">Processor</div>
+          <div class="filter-options-list">
+            <label class="filter-checkbox-label"><input type="checkbox" name="processorFilter" value="Core i3"> Intel Core i3</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="processorFilter" value="Core i5"> Intel Core i5</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="processorFilter" value="Core i7"> Intel Core i7</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="processorFilter" value="Core i9"> Intel Core i9</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="processorFilter" value="Ryzen 5"> AMD Ryzen 5</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="processorFilter" value="Ryzen 7"> AMD Ryzen 7</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="processorFilter" value="Apple M"> Apple M Series</label>
+          </div>
+        </div>
+
+        <!-- 4. RAM -->
+        <div class="filter-group">
+          <div class="filter-group-title">RAM Capacity</div>
+          <div class="filter-options-list">
+            <label class="filter-checkbox-label"><input type="checkbox" name="ramFilter" value="8"> 8 GB RAM</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="ramFilter" value="16"> 16 GB RAM</label>
+            <label class="filter-checkbox-label"><input type="checkbox" name="ramFilter" value="32"> 32 GB RAM</label>
+          </div>
+        </div>
+
+        <!-- 5. Price Range -->
+        <div class="filter-group">
+          <div class="filter-group-title">Price Range (₹)</div>
+          <div class="price-inputs-row">
+            <input type="number" id="minPrice" placeholder="Min ₹" min="0" step="1000">
+            <span>to</span>
+            <input type="number" id="maxPrice" placeholder="Max ₹" min="0" step="1000">
+          </div>
+        </div>
+
+        <!-- 6. Customer Rating -->
+        <div class="filter-group">
+          <div class="filter-group-title">Customer Rating</div>
+          <div class="filter-options-list">
+            <label class="filter-checkbox-label">
+              <input type="radio" name="ratingFilter" value="4.5">
+              <span class="star-rating-filter">★★★★½ &amp; Up</span>
+            </label>
+            <label class="filter-checkbox-label">
+              <input type="radio" name="ratingFilter" value="4.0">
+              <span class="star-rating-filter">★★★★☆ &amp; Up</span>
+            </label>
+            <label class="filter-checkbox-label">
+              <input type="radio" name="ratingFilter" value="0" checked>
+              <span>All Ratings</span>
+            </label>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Right Product Grid -->
+      <section class="catalogue-main">
+        <!-- Top Bar -->
+        <div class="catalogue-top-bar">
+          <div class="search-box-wrap">
+            <span class="search-icon-inside">🔍</span>
+            <input type="text" id="searchInput" placeholder="Search by name, brand or processor...">
+          </div>
+          <div class="sort-select-wrap">
+            <label for="sortSelect">Sort:</label>
+            <select id="sortSelect" class="sort-select">
+              <option value="featured">Featured</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="rating">Top Rated</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Results Count & Active Chips -->
+        <div>
+          <div id="productCountDisplay" style="font-size:0.875rem; font-weight:600; color:#64748b; margin-bottom:0.4rem;">
+            Showing all laptops
+          </div>
+          <div id="activeFilterChips" class="active-filter-chips"></div>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="products-grid" id="laptopGrid"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="footer-logo-desc">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">💻</div>
+          Tech<span>Nest</span>
+        </a>
+        <p>Premium multi-brand laptops with genuine warranty, smart filters and expert support.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="laptops.html">Laptop Catalogue</a></li>
+          <li><a href="cart.html">Shopping Cart</a></li>
+          <li><a href="services.html">Repair Services</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Store Contact</h4>
+        <p>📍 102 Tech Plaza, MG Road</p>
+        <p>📞 +91 98765 43210</p>
+        <p>✉️ support@technest.in</p>
+      </div>
+    </div>
+    <div class="footer-bottom container">
+      <p>&copy; 2026 TechNest Laptop Store. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/data.js?v=3"></script>
+  <script src="js/api-images.js?v=4"></script>
+  <script src="js/cart.js?v=2"></script>
+  <script src="js/admin.js?v=4"></script>
+  <script src="js/script.js?v=2"></script>
+  <script src="js/viewer3d.js?v=2"></script>
+</body>
+</html>

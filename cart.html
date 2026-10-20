@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart — TechNest Store</title>
+  <link rel="stylesheet" href="css/style.css?v=5">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 1 1%27%3E%3C/svg%3E">
+</head>
+<body>
+
+  <!-- Header Navigation -->
+  <header class="header">
+    <div class="container navbar">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">💻</div>
+        Tech<span>Nest</span>
+      </a>
+      <button class="hamburger" id="navToggle">&#9776;</button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="laptops.html">Laptops</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li>
+          <a href="cart.html" class="header-cart-link active">
+            <svg class="cart-icon-svg" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            Cart <span class="cart-badge-count">0</span>
+          </a>
+        </li>
+        <li><a href="admin-login.html" class="admin-nav-btn">Admin</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="page-banner">
+    <div class="container">
+      <h1>Your Shopping Cart</h1>
+      <p>Review your selected laptops before placing your order.</p>
+    </div>
+  </div>
+
+  <main class="container section-sm">
+    <div class="cart-layout-grid">
+
+      <!-- Cart Items Section -->
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem;">
+          <h2 style="font-size:1.3rem; color:#1e293b; font-weight:800;">Items in your cart</h2>
+          <button class="clear-filter-btn" onclick="clearCart()">Clear All</button>
+        </div>
+        <div id="cartItemsList">
+          <!-- Rendered dynamically by js/cart.js -->
+        </div>
+      </div>
+
+      <!-- Order Summary Sidebar -->
+      <div>
+        <div class="order-summary-card">
+          <h3 class="summary-title">Order Summary</h3>
+
+          <div class="summary-row">
+            <span>Original MRP Total</span>
+            <span id="cartMrpTotal">₹0</span>
+          </div>
+          <div class="summary-row" style="color:#16a34a;">
+            <span>Total Savings</span>
+            <span id="cartDiscount">-₹0</span>
+          </div>
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span id="cartSubtotal">₹0</span>
+          </div>
+          <div class="summary-row">
+            <span>Delivery Charges</span>
+            <span id="cartDeliveryFee" style="color:#16a34a; font-weight:700;">FREE</span>
+          </div>
+
+          <div class="summary-row total">
+            <span>Grand Total:</span>
+            <span id="cartGrandTotal">₹0</span>
+          </div>
+
+          <div style="margin:1.5rem 0 1rem;">
+            <a href="checkout.html" id="cartCheckoutBtn" class="btn btn-accent btn-full" style="padding:0.85rem 1rem; font-size:1rem;">
+              Proceed to Checkout →
+            </a>
+          </div>
+
+          <div class="secure-badge">
+            <span>🔒</span>
+            <span>Secure & Encrypted Checkout — Your data is safe with us.</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-bottom">
+      <p>&copy; 2026 TechNest Laptop Store. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/data.js?v=3"></script>
+  <script src="js/api-images.js?v=4"></script>
+  <script src="js/cart.js?v=2"></script>
+  <script src="js/admin.js?v=4"></script>
+  <script src="js/script.js?v=2"></script>
+</body>
+</html>
