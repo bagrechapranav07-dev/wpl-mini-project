@@ -13,7 +13,7 @@
     { name: "Rose Gold", a: "#e8c9c1", b: "#c29a92" },
     { name: "Gold", a: "#e6d3a3", b: "#b79f62" }
   ];
-  var modal, laptop, img, titleEl, specsEl, state, current = null;
+  var modal, laptop, img, titleEl, specsEl, xstack, state, current = null, step = 0, playing = true, xTimer = 0, view = "model", LAST = 9;
 
   /* ---------- helpers ---------- */
   function inr(n) { return "₹" + Number(n).toLocaleString("en-IN"); }
@@ -57,6 +57,9 @@
       '  <button class="v3d-close" aria-label="Close">&times;</button>' +
       '  <h3 class="v3d-title"></h3>' +
       '  <div class="v3d-main"><div class="v3d-left">' +
+      '    <div class="v3d-views"><button class="v3d-view active" data-view="model">&#128187; 3D Model</button>' +
+      '      <button class="v3d-view" data-view="asm">&#9881; See Assembly</button></div>' +
+      '    <div class="v3d-pm">' +
       '    <div class="v3d-stage">' +
       '      <div class="laptop-3d v3d-laptop">' +
       '        <div class="laptop-shadow"></div>' +
@@ -75,6 +78,32 @@
       '    </div>' +
       '    <div class="v3d-finish"><span>Finish:</span></div>' +
       '    <p class="v3d-hint">Drag to rotate &bull; arrow keys turn it &bull; +/&minus; zoom &bull; click a spec to inspect that part</p>' +
+      '    </div>' +
+      '    <div class="v3d-xwrap" hidden>' +
+      '      <div class="v3d-xhead"><b>&#9881; How it is assembled <small>(watch it being built)</small></b>' +
+      '      </div>' +
+      '      <div class="v3d-steps"><div class="v3d-step-cap"></div><div class="v3d-dots"></div>' +
+      '        <div class="v3d-step-btns"><button class="v3d-btn" data-act="sprev">&#9198; Back</button>' +
+      '        <button class="v3d-btn active" data-act="splay">&#9208; Pause</button>' +
+      '        <button class="v3d-btn" data-act="snext">Next &#9197;</button>' +
+      '        <button class="v3d-btn" data-act="srestart">&#8635; Restart</button></div></div>' +
+      '      <div class="v3d-parts-title">Components used (tap one to jump to it)</div><ul class="v3d-parts"></ul>' +
+      '      <div class="v3d-stage v3d-xstage"><div class="xv-scene"><div class="xv-stack" id="vxStack">' +
+      '        <div class="xv-layer xv-case" data-step="1" style="--i:0"><span class="xv-screw"></span><span class="xv-screw s2"></span><span class="xv-screw s3"></span><span class="xv-screw s4"></span></div>' +
+      '        <div class="xv-layer xv-bat" data-step="2" style="--i:1"><div class="xv-img" data-x="bat"></div></div>' +
+      '        <div class="xv-layer xv-board" data-step="3" style="--i:2">' +
+      '          <div class="xv-chip xc-cpu" data-step="4" data-x="cpu" style="left:105px;top:50px;width:78px"></div>' +
+      '          <div class="xv-chip xc-ram" data-step="5" data-x="ram" style="left:12px;top:132px;width:110px"></div>' +
+      '          <div class="xv-chip xc-ssd" data-step="6" data-x="ssd" style="left:180px;top:135px;width:120px"></div>' +
+      '        </div>' +
+      '        <div class="xv-layer xv-kb" data-step="7" style="--i:3"><div class="xv-img" data-x="kb"></div></div>' +
+      '        <div class="xv-layer xv-lid" data-step="8" style="--i:4"><img alt=""></div>' +
+      '      </div></div></div>' +
+      '      <ul class="xv-legend">' +
+      '        <li data-l="lid"><i style="background:#ec4899"></i>Display</li><li data-l="kb"><i style="background:#38bdf8"></i>Keyboard</li>' +
+      '        <li data-l="board"><i style="background:#22c55e"></i>Motherboard</li><li data-l="bat"><i style="background:#f59e0b"></i>Battery</li>' +
+      '        <li data-l="case"><i style="background:#94a3b8"></i>Bottom case</li></ul>' +
+      '    </div>' +
       '  </div><div class="v3d-specs"></div></div>' +
       '</div>';
     document.body.appendChild(modal);
@@ -82,6 +111,7 @@
     img = modal.querySelector("img");
     titleEl = modal.querySelector(".v3d-title");
     specsEl = modal.querySelector(".v3d-specs");
+    xstack = modal.querySelector("#vxStack");
     state = { mode: "auto", rx: DEFAULT.rx, ry: DEFAULT.ry, zoom: 1, dragging: false, raf: 0, lx: 0, ly: 0, tween: 0 };
 
     var fin = modal.querySelector(".v3d-finish");
@@ -94,12 +124,16 @@
     });
 
     modal.addEventListener("click", onClick);
+    modal.querySelectorAll(".xv-legend li").forEach(function (li) {
+      li.addEventListener("mouseenter", function () { xstack.classList.add("focus-" + li.dataset.l); });
+      li.addEventListener("mouseleave", function () { xstack.classList.remove("focus-" + li.dataset.l); });
+    });
     specsEl.addEventListener("change", function (e) {
       if (e.target.classList.contains("v3d-cmp-select")) renderCompare(parseInt(e.target.value, 10));
     });
     modal.querySelector("input").addEventListener("input", function (e) { state.zoom = e.target.value / 100; draw(); });
 
-    var stage = modal.querySelector(".v3d-stage");
+    modal.querySelectorAll(".v3d-stage").forEach(function (stage) {
     stage.addEventListener("pointerdown", function (e) {
       cancelAnimationFrame(state.tween);
       state.dragging = true; state.lx = e.clientX; state.ly = e.clientY;
@@ -115,6 +149,7 @@
     function end() { state.dragging = false; }
     stage.addEventListener("pointerup", end);
     stage.addEventListener("pointercancel", end);
+    });
 
     document.addEventListener("keydown", function (e) {
       if (!modal.classList.contains("open")) return;
@@ -136,9 +171,14 @@
     if (sw) {
       var f = FINISHES[sw.dataset.finish];
       laptop.style.setProperty("--ch-a", f.a); laptop.style.setProperty("--ch-b", f.b);
+      xstack.style.setProperty("--ch-a", f.a); xstack.style.setProperty("--ch-b", f.b);
       modal.querySelectorAll(".v3d-swatch").forEach(function (s) { s.classList.toggle("active", s === sw); });
       return;
     }
+    var vw = t.closest(".v3d-view");
+    if (vw) return setView(vw.dataset.view);
+    var pr = t.closest(".v3d-part[data-step]");
+    if (pr) { playing = false; updatePlayBtn(); return setStep(+pr.dataset.step); }
     var tab = t.closest(".v3d-tab");
     if (tab) return showTab(tab.dataset.tab);
 
@@ -156,6 +196,10 @@
     var b = t.closest(".v3d-btn");
     if (!b) return;
     if (b.dataset.mode) setMode(b.dataset.mode);
+    if (b.dataset.act === "splay") { playing = !playing; updatePlayBtn(); }
+    if (b.dataset.act === "snext") { playing = false; updatePlayBtn(); setStep(Math.min(step + 1, LAST)); }
+    if (b.dataset.act === "sprev") { playing = false; updatePlayBtn(); setStep(Math.max(step - 1, 0)); }
+    if (b.dataset.act === "srestart") { playing = true; updatePlayBtn(); setStep(0); }
     if (b.dataset.act === "reset") { setMode("manual"); flyTo(DEFAULT.rx, DEFAULT.ry); }
     if (b.dataset.act === "screen") {
       var off = laptop.classList.toggle("screen-off");
@@ -166,6 +210,7 @@
   /* ---------- 3D state ---------- */
   function draw() {
     laptop.style.transform = "scale(" + state.zoom + ") rotateX(" + state.rx + "deg) rotateY(" + state.ry + "deg)";
+    xstack.style.transform = "scale(" + state.zoom + ") rotateX(" + clamp(40 + state.rx * 0.8, 20, 88) + "deg) rotateZ(" + (state.ry + 25) + "deg)";
   }
   function setZoom(z) {
     state.zoom = clamp(z, 0.6, 1.5);
@@ -197,6 +242,11 @@
     modal.querySelectorAll(".glow").forEach(function (n) { n.classList.remove("glow"); });
     modal.querySelectorAll("[data-focus]").forEach(function (n) { n.classList.toggle("sel", n.dataset.focus === part); });
     laptop.classList.remove("show-hs");
+    xstack.classList.remove("focus-lid", "focus-board");
+    playing = false; updatePlayBtn(); setStep(LAST - 1);
+    xstack.classList.add(part === "display" ? "focus-lid" : "focus-board");
+    var xc = xstack.querySelector(part === "display" ? ".xv-lid" : ".xc-" + part);
+    if (xc) xc.classList.add("glow");
     if (part === "display") {
       flyTo(4, 0); laptop.querySelector(".laptop-lid").classList.add("glow");
     } else {
@@ -276,6 +326,110 @@
     }).join("") + '</table><p class="v3d-tip">Green marks the better value in each row.</p>';
   }
 
+  /* ---------- assembly view ---------- */
+  var STEP_NAMES = [
+    "Press Play to watch it being built",
+    "Bottom case &mdash; the base of the laptop",
+    "Battery &mdash; powers the laptop",
+    "Motherboard &mdash; connects everything together",
+    "Processor &mdash; %CPU%, the brain",
+    "Memory &mdash; %RAM% GB RAM, short-term memory",
+    "Storage &mdash; %SSD% SSD, keeps your files",
+    "Keyboard &mdash; typing and trackpad",
+    "Display &mdash; the screen",
+    "Done! Your laptop is assembled"
+  ];
+
+  function updatePlayBtn() {
+    var b = modal.querySelector('[data-act="splay"]');
+    b.innerHTML = playing ? "&#9208; Pause" : "&#9654; Play";
+    b.classList.toggle("active", playing);
+  }
+
+  function setView(v) {
+    view = v;
+    modal.querySelectorAll(".v3d-view").forEach(function (b) { b.classList.toggle("active", b.dataset.view === v); });
+    modal.querySelector(".v3d-pm").hidden = v !== "model";
+    modal.querySelector(".v3d-xwrap").hidden = v !== "asm";
+    if (v === "asm") { playing = true; updatePlayBtn(); setStep(0); }
+  }
+
+  /* step 0 = nothing fitted, 1..8 = parts fitted one by one, 9 = closed up */
+  function setStep(n) {
+    step = n;
+    xstack.style.setProperty("--gap", (n >= LAST ? 4 : 52) + "px");
+    xstack.querySelectorAll("[data-step]").forEach(function (el) {
+      var s = +el.dataset.step;
+      el.classList.toggle("out", s > n);
+      el.classList.toggle("now", s === n && n < LAST);
+    });
+    var l = current || {}, cap = STEP_NAMES[n]
+      .replace("%CPU%", l.processor || "processor").replace("%RAM%", l.ramNum || 8).replace("%SSD%", storageLabel(l));
+    modal.querySelector(".v3d-step-cap").innerHTML = "<b>Step " + n + " / " + LAST + "</b> &mdash; " + cap;
+    var dots = modal.querySelector(".v3d-dots");
+    if (!dots.children.length) for (var i = 0; i <= LAST; i++) dots.appendChild(document.createElement("i"));
+    Array.prototype.forEach.call(dots.children, function (d, i) { d.classList.toggle("on", i <= n); });
+    modal.querySelectorAll(".v3d-part[data-step]").forEach(function (r) {
+      var s = +r.dataset.step;
+      r.classList.toggle("done", s <= n); r.classList.toggle("cur", s === n && n < LAST);
+    });
+  }
+
+  function renderParts(l) {
+    var rows = [
+      [1, "Bottom case", "Metal base / chassis"], [2, "Battery", "Rechargeable Li-ion"],
+      [3, "Motherboard", (l.brand || "") + " main board"], [4, "Processor (CPU)", l.processor],
+      [5, "Memory (RAM)", l.ram || ((l.ramNum || 8) + " GB")], [6, "Storage (SSD)", l.storage || storageLabel(l)],
+      [7, "Keyboard", "Keys + trackpad"], [8, "Display", (l.displaySize || "") + " screen"]
+    ];
+    if (l.os) rows.push([0, "Software", l.os]);
+    modal.querySelector(".v3d-parts").innerHTML = rows.map(function (r) {
+      return '<li class="v3d-part"' + (r[0] ? ' data-step="' + r[0] + '"' : "") + '><i></i><b>' + r[1] + "</b><span>" + r[2] + "</span></li>";
+    }).join("");
+  }
+
+  function stepTimer() {
+    clearInterval(xTimer);
+    var wait = 0;
+    xTimer = setInterval(function () {
+      if (view !== "asm" || !playing) return;
+      if (step >= LAST) { if (++wait < 2) return; wait = 0; return setStep(0); }
+      wait = 0; setStep(step + 1);
+    }, 2600);
+  }
+
+  function svg(w, h, body) { return '<svg viewBox="0 0 ' + w + " " + h + '" xmlns="http://www.w3.org/2000/svg">' + body + "</svg>"; }
+  function storageLabel(l) { var n = l.storageNum || 256; return n >= 1024 ? (n / 1024) + " TB" : n + " GB"; }
+  function partSvg(kind, l) {
+    var i, j, r, q;
+    if (kind === "cpu") {
+      var w = String(l.processor || "CPU").split(" "), a = w[0].toUpperCase(), b = w.slice(1).join(" ").slice(0, 10), pins = "";
+      for (i = 0; i < 8; i++) { var p = 22 + i * 10; pins += '<rect x="' + p + '" y="6" width="4" height="8" fill="#c9a24b"/><rect x="' + p + '" y="86" width="4" height="8" fill="#c9a24b"/><rect x="6" y="' + (p - 8) + '" width="8" height="4" fill="#c9a24b"/><rect x="86" y="' + (p - 8) + '" width="8" height="4" fill="#c9a24b"/>'; }
+      return svg(100, 100, '<rect x="12" y="12" width="76" height="76" rx="6" fill="#1f2937" stroke="#64748b" stroke-width="2"/>' + pins + '<rect x="26" y="26" width="48" height="48" rx="4" fill="#94a3b8"/><text x="50" y="48" text-anchor="middle" font-size="10" font-weight="800" fill="#0f172a">' + a + '</text><text x="50" y="62" text-anchor="middle" font-size="9" font-weight="800" fill="#0f172a">' + b + "</text>");
+    }
+    if (kind === "ram") {
+      var c = "", g = "";
+      for (i = 0; i < 4; i++) c += '<rect x="' + (20 + i * 38) + '" y="18" width="30" height="26" rx="2" fill="#111827"/>';
+      for (j = 0; j < 20; j++) g += '<rect x="' + (8 + j * 7) + '" y="56" width="4" height="10" fill="#d4af37"/>';
+      return svg(160, 80, '<rect x="4" y="8" width="152" height="60" rx="4" fill="#15803d"/>' + c + g + '<text x="80" y="55" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">' + (l.ramNum || 8) + " GB RAM</text>");
+    }
+    if (kind === "ssd") return svg(160, 70, '<rect x="14" y="10" width="136" height="42" rx="4" fill="#1e3a8a"/><rect x="26" y="16" width="30" height="30" rx="2" fill="#0f172a"/><rect x="62" y="16" width="30" height="30" rx="2" fill="#0f172a"/><rect x="98" y="20" width="44" height="22" rx="2" fill="#e2e8f0"/><text x="120" y="35" text-anchor="middle" font-size="9" font-weight="800" fill="#0f172a">' + storageLabel(l) + '</text><rect x="4" y="14" width="10" height="34" fill="#d4af37"/>');
+    if (kind === "kb") {
+      var k = "";
+      for (r = 0; r < 4; r++) for (q = 0; q < 12; q++) k += '<rect x="' + (8 + q * 12) + '" y="' + (8 + r * 14) + '" width="10" height="11" rx="2" fill="#e2e8f0"/>';
+      return svg(160, 70, '<rect x="2" y="2" width="156" height="66" rx="6" fill="#1e293b"/>' + k);
+    }
+    return svg(150, 80, '<rect x="6" y="14" width="130" height="52" rx="6" fill="#065f46" stroke="#34d399" stroke-width="2"/><rect x="136" y="30" width="10" height="20" rx="2" fill="#34d399"/><text x="70" y="45" text-anchor="middle" font-size="11" font-weight="800" fill="#d1fae5">LI-ION BATTERY</text>');
+  }
+  function renderXv(l, src) {
+    modal.querySelector(".v3d-views").style.display = l ? "" : "none";
+    if (!l) return;
+    xstack.querySelectorAll("[data-x]").forEach(function (n) { n.innerHTML = partSvg(n.dataset.x, l); });
+    xstack.querySelector(".xv-lid img").src = src;
+    xstack.style.removeProperty("--ch-a"); xstack.style.removeProperty("--ch-b");
+    xstack.classList.remove("focus-lid", "focus-board", "focus-kb", "focus-bat", "focus-case");
+  }
+
   /* ---------- open / close ---------- */
   function open(src, name, l) {
     if (!modal) build();
@@ -289,7 +443,9 @@
     modal.querySelector('[data-act="screen"]').innerHTML = "&#128250; Screen: On";
     state.rx = DEFAULT.rx; state.ry = DEFAULT.ry; state.zoom = 1;
     modal.querySelector("input").value = 100;
+    renderXv(l, src); renderParts(l || {}); setView("model");
     setMode("auto"); draw();
+    stepTimer();
     laptop.classList.remove("opening"); void laptop.offsetWidth; laptop.classList.add("opening");
     modal.classList.add("open");
     document.body.style.overflow = "hidden";
@@ -299,7 +455,7 @@
   function close() {
     modal.classList.remove("open");
     document.body.style.overflow = "";
-    cancelAnimationFrame(state.raf); cancelAnimationFrame(state.tween);
+    cancelAnimationFrame(state.raf); cancelAnimationFrame(state.tween); clearInterval(xTimer);
   }
 
   document.addEventListener("click", function (e) {
