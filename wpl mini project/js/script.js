@@ -15,8 +15,27 @@ function setupNavigation() {
   const toggleBtn = document.getElementById("navToggle");
   const navLinks = document.getElementById("navLinks");
   if (toggleBtn && navLinks) {
+    const setMenuOpen = isOpen => {
+      navLinks.classList.toggle("show", isOpen);
+      toggleBtn.setAttribute("aria-expanded", String(isOpen));
+      toggleBtn.setAttribute("aria-label", isOpen ? "Close navigation menu" : "Open navigation menu");
+    };
+
     toggleBtn.addEventListener("click", () => {
-      navLinks.classList.toggle("show");
+      setMenuOpen(!navLinks.classList.contains("show"));
+    });
+
+    navLinks.addEventListener("click", event => {
+      if (event.target instanceof Element && event.target.closest("a")) {
+        setMenuOpen(false);
+      }
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && navLinks.classList.contains("show")) {
+        setMenuOpen(false);
+        toggleBtn.focus();
+      }
     });
   }
 }
