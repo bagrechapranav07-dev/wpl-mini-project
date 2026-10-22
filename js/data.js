@@ -4,6 +4,7 @@ const LAPTOPS = [
   {
     id: 1,
     name: "Apple MacBook Air M2",
+    image: "images/laptops/apple-macbook-air-m2.jpg",
     brand: "Apple",
     processor: "Apple M2",
     processorSeries: "Apple M Series",
@@ -24,6 +25,7 @@ const LAPTOPS = [
   {
     id: 2,
     name: "Dell XPS 13 9315",
+    image: "images/laptops/dell-xps-13.jpg",
     brand: "Dell",
     processor: "Intel Core i7",
     processorSeries: "Intel Core i7",
@@ -44,6 +46,7 @@ const LAPTOPS = [
   {
     id: 3,
     name: "HP Pavilion 15 Core i5",
+    image: "images/laptops/hp-pavilion-15.jpg",
     brand: "HP",
     processor: "Intel Core i5",
     processorSeries: "Intel Core i5",
@@ -64,6 +67,7 @@ const LAPTOPS = [
   {
     id: 4,
     name: "ASUS ROG Strix G16 Gaming",
+    image: "images/laptops/asus-rog-strix-g16.jpg",
     brand: "ASUS",
     processor: "Intel Core i7",
     processorSeries: "Intel Core i7",
@@ -84,6 +88,7 @@ const LAPTOPS = [
   {
     id: 5,
     name: "Lenovo IdeaPad Slim 3",
+    image: "images/laptops/lenovo-ideapad.jpg",
     brand: "Lenovo",
     processor: "Intel Core i3",
     processorSeries: "Intel Core i3",
@@ -104,6 +109,7 @@ const LAPTOPS = [
   {
     id: 6,
     name: "Acer Nitro 5 Ryzen 7",
+    image: "images/laptops/acer-nitro-5.jpg",
     brand: "Acer",
     processor: "AMD Ryzen 7",
     processorSeries: "AMD Ryzen 7",
@@ -124,6 +130,7 @@ const LAPTOPS = [
   {
     id: 7,
     name: "Apple MacBook Pro 14 M3",
+    image: "images/laptops/apple-macbook-pro-14-m3.jpg",
     brand: "Apple",
     processor: "Apple M3",
     processorSeries: "Apple M Series",
@@ -144,6 +151,7 @@ const LAPTOPS = [
   {
     id: 8,
     name: "MSI Thin GF63 Gaming",
+    image: "images/laptops/msi-thin-gf63.jpg",
     brand: "MSI",
     processor: "Intel Core i5",
     processorSeries: "Intel Core i5",
@@ -164,6 +172,7 @@ const LAPTOPS = [
   {
     id: 9,
     name: "Lenovo ThinkPad E14 Gen 5",
+    image: "images/laptops/lenovo-thinkpad-e14.jpg",
     brand: "Lenovo",
     processor: "AMD Ryzen 5",
     processorSeries: "AMD Ryzen 5",
@@ -184,6 +193,7 @@ const LAPTOPS = [
   {
     id: 10,
     name: "TechNest Creator Book 16",
+    image: "images/laptops/technest-creator-book-16.jpg",
     brand: "TechNest",
     processor: "Intel Core i9",
     processorSeries: "Intel Core i9",
@@ -204,6 +214,7 @@ const LAPTOPS = [
   {
     id: 11,
     name: "HP Victus Gaming 15",
+    image: "images/laptops/hp-victus-15.jpg",
     brand: "HP",
     processor: "AMD Ryzen 5",
     processorSeries: "AMD Ryzen 5",
@@ -224,6 +235,7 @@ const LAPTOPS = [
   {
     id: 12,
     name: "Dell Inspiron 14 2-in-1",
+    image: "images/laptops/dell-inspiron-14-2in1.jpg",
     brand: "Dell",
     processor: "Intel Core i5",
     processorSeries: "Intel Core i5",
@@ -243,60 +255,9 @@ const LAPTOPS = [
   }
 ];
 
-// Pristine snapshot of the full seed catalogue, captured before any admin edits are applied.
-// Used to reset pricing to default and to restore a deleted laptop.
+// Pristine snapshot of the built-in catalogue. Used by backend/seed.js and to reset pricing to default.
 const LAPTOPS_SEED = LAPTOPS.map(l => ({ ...l }));
 const LAPTOPS_DEFAULT_PRICING = LAPTOPS_SEED.map(l => ({ id: l.id, price: l.price, originalPrice: l.originalPrice }));
-
-// Append any laptops the admin has added (from localStorage) on top of the seed data.
-// Runs before price overrides so a custom laptop's price/discount edits also apply.
-// New laptops are stored under ids >= 1000 so they never collide with the seed catalogue.
-(function appendStoredCustomLaptops() {
-  try {
-    const customLaptops = JSON.parse(localStorage.getItem("technest_custom_laptops") || "[]");
-    customLaptops.forEach(laptop => {
-      if (!LAPTOPS.find(l => l.id === laptop.id)) {
-        LAPTOPS.push(laptop);
-      }
-    });
-  } catch (e) {
-    console.warn("Could not load admin-added laptops:", e);
-  }
-})();
-
-// Apply any admin-saved price/discount overrides (from localStorage) on top of the seed data.
-// Runs immediately on every page load, before any rendering happens, so every page that
-// reads LAPTOPS (home, catalogue, cart, checkout) automatically reflects admin pricing changes.
-(function applyStoredLaptopPriceOverrides() {
-  try {
-    const overrides = JSON.parse(localStorage.getItem("technest_price_overrides") || "{}");
-    LAPTOPS.forEach(laptop => {
-      const o = overrides[laptop.id];
-      if (o) {
-        if (typeof o.price === "number") laptop.price = o.price;
-        if (typeof o.originalPrice === "number") laptop.originalPrice = o.originalPrice;
-      }
-    });
-  } catch (e) {
-    console.warn("Could not apply stored laptop price overrides:", e);
-  }
-})();
-
-// Remove any laptops the admin has deleted (from localStorage) on top of the seed data.
-// Runs on every page load, so a deletion from the admin dashboard disappears from the
-// home page and catalogue for every visitor on this browser.
-(function applyStoredLaptopDeletions() {
-  try {
-    const deletedIds = JSON.parse(localStorage.getItem("technest_deleted_laptops") || "[]");
-    if (deletedIds.length) {
-      for (let i = LAPTOPS.length - 1; i >= 0; i--) {
-        if (deletedIds.includes(LAPTOPS[i].id)) LAPTOPS.splice(i, 1);
-      }
-    }
-  } catch (e) {
-    console.warn("Could not apply stored laptop deletions:", e);
-  }
-})();
 
 const ACCESSORIES = [
   { id: 101, name: "Wireless Ergonomic Mouse", price: 899, formattedPrice: "₹899", originalPrice: 1499, category: "Peripherals", brand: "TechNest", rating: 4.5, reviewsCount: 320 },
@@ -308,6 +269,27 @@ const ACCESSORIES = [
   { id: 107, name: "Dual-Fan Laptop Cooling Pad", price: 1499, formattedPrice: "₹1,499", originalPrice: 2199, category: "Cooling", brand: "TechNest", rating: 4.3, reviewsCount: 290 },
   { id: 108, name: "Water Resistant Laptop Bag", price: 1599, formattedPrice: "₹1,599", originalPrice: 2499, category: "Bags", brand: "TechNest", rating: 4.6, reviewsCount: 910 }
 ];
+
+// Laptops the admin removed from the storefront (restorable from the dashboard)
+const LAPTOPS_REMOVED = [];
+
+// Load the live catalogue from MongoDB, replacing the built-in data above.
+// If the backend is offline, the built-in catalogue is used as-is.
+(function loadCatalogueFromBackend() {
+  if (typeof apiGetSync !== "function") return;
+
+  const laptops = apiGetSync("/laptops?all=1");
+  if (laptops) {
+    LAPTOPS.length = 0;
+    laptops.map(fromApiProduct).forEach(l => (l.isActive === false ? LAPTOPS_REMOVED : LAPTOPS).push(l));
+  }
+
+  const accessories = apiGetSync("/accessories");
+  if (accessories) {
+    ACCESSORIES.length = 0;
+    accessories.map(fromApiProduct).forEach(a => ACCESSORIES.push(a));
+  }
+})();
 
 // Helper to format currency in Indian format (₹)
 function formatINR(amount) {

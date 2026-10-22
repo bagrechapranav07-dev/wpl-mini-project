@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const laptopSchema = new mongoose.Schema(
   {
+    productId: { type: Number, required: true, unique: true }, // numeric id used by the storefront
     name: { type: String, required: true, trim: true },
     brand: { type: String, required: true, trim: true },
     processor: { type: String, required: true },
@@ -24,7 +25,8 @@ const laptopSchema = new mongoose.Schema(
     badge: { type: String },
     description: { type: String },
     image: { type: String },
-    stock: { type: Number, default: 0, min: 0 }
+    stock: { type: Number, default: 0, min: 0 },
+    isActive: { type: Boolean, default: true } // false = removed from storefront, restorable by admin
   },
   { timestamps: true }
 );

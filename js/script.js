@@ -217,7 +217,7 @@ function setupLaptopCatalogue() {
   });
 
   if (clearFiltersBtn) {
-    clearFiltersBtn.addEventListener("click", resetAllFilters);
+    clearFiltersBtn.addEventListener("click", () => window.resetAllFilters());
   }
 
   window.resetAllFilters = function() {
@@ -285,18 +285,15 @@ function setupAccessoriesCatalogue() {
   });
 }
 
-// Form Handlers (Logs messages & repairs into Admin responses)
+// Form Handlers (Saves messages & repairs to the backend)
 function setupForms() {
   const repairForm = document.getElementById("repairForm");
   const contactForm = document.getElementById("contactForm");
 
   if (repairForm) {
-    repairForm.addEventListener("submit", (e) => {
+    repairForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const formData = new FormData(repairForm);
       const repairData = {
-        id: "REP-" + Math.floor(1000 + Math.random() * 9000),
-        date: new Date().toLocaleString("en-IN"),
         name: repairForm.querySelector('[name="name"]')?.value || "Customer",
         phone: repairForm.querySelector('[name="phone"]')?.value || "",
         laptopModel: repairForm.querySelector('[name="laptopModel"]')?.value || "Laptop",
@@ -304,21 +301,22 @@ function setupForms() {
         description: repairForm.querySelector('[name="description"]')?.value || ""
       };
 
-      if (typeof saveRepairBooking === "function") {
-        saveRepairBooking(repairData);
+      try {
+        await saveRepairBooking(repairData);
+      } catch (err) {
+        alert("Sorry, we couldn't save your booking right now. Please try again.\n\n" + err.message);
+        return;
       }
 
-      alert("Thank you! Your repair booking has been saved and logged to store responses. Our technician will contact you shortly.");
+      alert("Thank you! Your repair booking has been saved. Our technician will contact you shortly.");
       repairForm.reset();
     });
   }
 
   if (contactForm) {
-    contactForm.addEventListener("submit", (e) => {
+    contactForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const msgData = {
-        id: "MSG-" + Math.floor(1000 + Math.random() * 9000),
-        date: new Date().toLocaleString("en-IN"),
         name: contactForm.querySelector('[name="name"]')?.value || "Visitor",
         email: contactForm.querySelector('[name="email"]')?.value || "",
         phone: contactForm.querySelector('[name="phone"]')?.value || "",
@@ -326,8 +324,11 @@ function setupForms() {
         message: contactForm.querySelector('[name="message"]')?.value || ""
       };
 
-      if (typeof saveContactMessage === "function") {
-        saveContactMessage(msgData);
+      try {
+        await saveContactMessage(msgData);
+      } catch (err) {
+        alert("Sorry, we couldn't send your message right now. Please try again.\n\n" + err.message);
+        return;
       }
 
       alert("Thank you for contacting TechNest! Your inquiry has been submitted and recorded.");

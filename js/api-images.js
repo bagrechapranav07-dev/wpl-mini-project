@@ -80,13 +80,8 @@ function buildImageSearchQuery(item) {
  * Queries live API endpoints (DummyJSON laptop endpoint or Unsplash public API)
  */
 async function fetchProductImageFromAPI(laptopItem) {
-  // Admin-set custom image (URL or uploaded photo) always wins over the auto-fetched one
-  try {
-    const imageOverrides = JSON.parse(localStorage.getItem("technest_image_overrides") || "{}");
-    if (imageOverrides[laptopItem.id]) {
-      return imageOverrides[laptopItem.id];
-    }
-  } catch (e) {}
+  // Admin-set custom image (URL or uploaded photo, stored in MongoDB) always wins over the auto-fetched one
+  if (laptopItem.image) return laptopItem.image;
 
   // Otherwise use the clean generated render (stock photos came back with keyboards/screens the wrong way round).
   // The Unsplash lookup below is kept for reference but is no longer reached.

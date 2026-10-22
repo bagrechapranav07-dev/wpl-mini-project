@@ -7,12 +7,14 @@
 (function () {
   var DEFAULT = { rx: 26, ry: -25 };
   var FINISHES = [
+    { name: "Original" },
     { name: "Silver", a: "#d5dae6", b: "#a3abbd" },
     { name: "Space Gray", a: "#6b7285", b: "#3c4254" },
     { name: "Midnight", a: "#2c3550", b: "#161c30" },
     { name: "Rose Gold", a: "#e8c9c1", b: "#c29a92" },
     { name: "Gold", a: "#e6d3a3", b: "#b79f62" }
   ];
+  var gl = null, glPending = null; // three.js view (js/laptop3d.js); the CSS laptop is the fallback
   var modal, laptop, img, titleEl, specsEl, xstack, state, current = null, step = 0, playing = true, xTimer = 0, view = "model", LAST = 9;
 
   /* ---------- helpers ---------- */
@@ -60,7 +62,7 @@
       '    <div class="v3d-views"><button class="v3d-view active" data-view="model">&#128187; 3D Model</button>' +
       '      <button class="v3d-view" data-view="asm">&#9881; See Assembly</button></div>' +
       '    <div class="v3d-pm">' +
-      '    <div class="v3d-stage">' +
+      '    <div class="v3d-stage v3d-mstage"><div class="v3d-gl"></div>' +
       '      <div class="laptop-3d v3d-laptop">' +
       '        <div class="laptop-shadow"></div>' +
       '        <div class="laptop-base">' +
@@ -74,6 +76,7 @@
       '      <button class="v3d-btn" data-mode="manual">&#9995; Manual</button>' +
       '      <button class="v3d-btn" data-act="reset">Reset</button>' +
       '      <button class="v3d-btn" data-act="screen">&#128250; Screen: On</button>' +
+      '      <button class="v3d-btn" data-act="lid">&#128187; Close Lid</button>' +
       '      <label class="v3d-zoom">Zoom <input type="range" min="60" max="150" value="100"></label>' +
       '    </div>' +
       '    <div class="v3d-finish"><span>Finish:</span></div>' +
@@ -119,11 +122,19 @@
       var b = document.createElement("button");
       b.className = "v3d-swatch" + (i === 0 ? " active" : "");
       b.title = f.name; b.dataset.finish = i;
-      b.style.background = "linear-gradient(135deg," + f.a + "," + f.b + ")";
+      b.style.background = f.a ? "linear-gradient(135deg," + f.a + "," + f.b + ")" : "conic-gradient(#2e3642 0 25%,#c9ccd1 0 50%,#5d5a5c 0 75%,#d9d6cf 0)";
       fin.appendChild(b);
     });
 
     modal.addEventListener("click", onClick);
+    if (window.Laptop3D) {
+      Laptop3D.load().then(function () {
+        gl = Laptop3D.create(modal.querySelector(".v3d-gl"));
+        modal.querySelector(".v3d-mstage").classList.add("gl-on");
+        if (glPending) { gl.setLaptop(glPending); glPending = null; }
+        draw();
+      }).catch(function (e) { console.warn("3D engine unavailable, using CSS laptop", e); });
+    }
     modal.querySelectorAll(".xv-legend li").forEach(function (li) {
       li.addEventListener("mouseenter", function () { xstack.classList.add("focus-" + li.dataset.l); });
       li.addEventListener("mouseleave", function () { xstack.classList.remove("focus-" + li.dataset.l); });
@@ -170,8 +181,11 @@
     var sw = t.closest(".v3d-swatch");
     if (sw) {
       var f = FINISHES[sw.dataset.finish];
-      laptop.style.setProperty("--ch-a", f.a); laptop.style.setProperty("--ch-b", f.b);
-      xstack.style.setProperty("--ch-a", f.a); xstack.style.setProperty("--ch-b", f.b);
+      [laptop, xstack].forEach(function (n) {
+        if (f.a) { n.style.setProperty("--ch-a", f.a); n.style.setProperty("--ch-b", f.b); }
+        else { n.style.removeProperty("--ch-a"); n.style.removeProperty("--ch-b"); }
+      });
+      if (gl) gl.setFinish(f.a || null);
       modal.querySelectorAll(".v3d-swatch").forEach(function (s) { s.classList.toggle("active", s === sw); });
       return;
     }
@@ -203,13 +217,20 @@
     if (b.dataset.act === "reset") { setMode("manual"); flyTo(DEFAULT.rx, DEFAULT.ry); }
     if (b.dataset.act === "screen") {
       var off = laptop.classList.toggle("screen-off");
+      if (gl) gl.setScreen(!off);
       b.innerHTML = "&#128250; Screen: " + (off ? "Off" : "On");
+    }
+    if (b.dataset.act === "lid") {
+      var shut = b.classList.toggle("shut");
+      if (gl) gl.setLid(!shut);
+      b.innerHTML = "&#128187; " + (shut ? "Open Lid" : "Close Lid");
     }
   }
 
   /* ---------- 3D state ---------- */
   function draw() {
-    laptop.style.transform = "scale(" + (state.zoom * 0.8) + ") rotateX(" + (-state.rx) + "deg) rotateY(" + state.ry + "deg)";
+    if (gl) gl.frame(state.rx, state.ry, state.zoom);
+    else laptop.style.transform = "scale(" + (state.zoom * 0.8) + ") rotateX(" + (-state.rx) + "deg) rotateY(" + state.ry + "deg)";
     xstack.style.transform = "scale(" + state.zoom + ") rotateX(" + clamp(40 + state.rx * 0.8, 20, 88) + "deg) rotateZ(" + (state.ry + 25) + "deg)";
   }
   function setZoom(z) {
@@ -217,7 +238,8 @@
     modal.querySelector("input").value = Math.round(state.zoom * 100); draw();
   }
   function tick() {
-    if (state.mode === "auto" && !state.dragging) { state.ry += 0.6; draw(); }
+    if (state.mode === "auto" && !state.dragging) state.ry += 0.6;
+    draw(); // every frame: the 3D lid and highlight animations need it
     state.raf = requestAnimationFrame(tick);
   }
   function setMode(m) {
@@ -242,6 +264,7 @@
     modal.querySelectorAll(".glow").forEach(function (n) { n.classList.remove("glow"); });
     modal.querySelectorAll("[data-focus]").forEach(function (n) { n.classList.toggle("sel", n.dataset.focus === part); });
     laptop.classList.remove("show-hs");
+    if (gl) gl.highlight(part);
     xstack.classList.remove("focus-lid", "focus-board");
     playing = false; updatePlayBtn(); setStep(LAST - 1);
     xstack.classList.add(part === "display" ? "focus-lid" : "focus-board");
@@ -433,7 +456,12 @@
   /* ---------- open / close ---------- */
   function open(src, name, l) {
     if (!modal) build();
-    if (l && typeof laptopScreenDataUrl === "function" && src.indexOf("tn-render") >= 0) src = laptopScreenDataUrl(l);
+    // the screen shows a wallpaper, never the product photo itself
+    if (l && typeof laptopScreenDataUrl === "function") src = laptopScreenDataUrl(l);
+    var model = l || { brand: "TechNest", name: "TechNest Laptop", displaySize: '15.6"', category: "Professional" };
+    if (gl) { gl.setLaptop(model); gl.highlight(null); gl.setFinish(null); gl.setScreen(true); } else glPending = model;
+    var lidBtn = modal.querySelector('[data-act="lid"]');
+    lidBtn.classList.remove("shut"); lidBtn.innerHTML = "&#128187; Close Lid";
     current = l || null;
     if (typeof applyBrandLogoToLaptop === "function") applyBrandLogoToLaptop(laptop, l ? l.brand : "TechNest");
     renderPanel(l);

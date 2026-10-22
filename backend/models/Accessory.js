@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const accessorySchema = new mongoose.Schema(
   {
+    productId: { type: Number, required: true, unique: true }, // numeric id used by the storefront
     name: { type: String, required: true, trim: true },
     price: { type: Number, required: true, min: 0 },
     originalPrice: { type: Number, required: true, min: 0 },

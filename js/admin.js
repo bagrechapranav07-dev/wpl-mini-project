@@ -1,19 +1,23 @@
 /**
  * TechNest - Admin Portal Logic & Response Management Engine
- * Manages Admin Auth state and displays all customer responses (Orders, Contact Inquiries, Service Requests)
+ * Manages Admin Auth state and displays all customer responses (Orders, Contact Inquiries, Service Requests).
+ * All data is read from and written to MongoDB through the backend API (js/api.js).
  */
 
 const ADMIN_AUTH_KEY = "technest_admin_auth";
-const ADMIN_ORDERS_KEY = "technest_admin_orders";
-const ADMIN_MESSAGES_KEY = "technest_admin_messages";
-const ADMIN_REPAIRS_KEY = "technest_admin_repairs";
 
-function initializeAdminData() {
-  [ADMIN_ORDERS_KEY, ADMIN_MESSAGES_KEY, ADMIN_REPAIRS_KEY].forEach(key => {
-    if (!localStorage.getItem(key)) {
-      localStorage.setItem(key, "[]");
-    }
-  });
+// Responses loaded from the backend when the dashboard opens
+let adminOrders = [];
+let adminMessages = [];
+let adminRepairs = [];
+
+function formatAdminDate(isoDate) {
+  return isoDate ? new Date(isoDate).toLocaleString("en-IN") : "";
+}
+
+function formatShippingAddress(a) {
+  if (!a) return "N/A";
+  return `${a.address}, ${a.city}, ${a.state} - ${a.pincode}`;
 }
 
 // Check admin authentication
@@ -21,13 +25,15 @@ function isAdminLoggedIn() {
   return localStorage.getItem(ADMIN_AUTH_KEY) === "true";
 }
 
-// Perform Login
-function performAdminLogin(username, password) {
-  if (username === "admin" && password === "admin123") {
+// Perform Login (verified against the Admin collection in MongoDB)
+async function performAdminLogin(username, password) {
+  try {
+    await apiRequest("/admin/login", { method: "POST", body: { username, password } });
     localStorage.setItem(ADMIN_AUTH_KEY, "true");
     return true;
+  } catch (e) {
+    return false;
   }
-  return false;
 }
 
 // Perform Logout
@@ -36,32 +42,23 @@ function performAdminLogout() {
   window.location.href = "admin-login.html";
 }
 
-// Log a new customer order into localStorage
+// Save a new customer order to the backend
 function saveCustomerOrder(orderData) {
-  initializeAdminData();
-  const orders = JSON.parse(localStorage.getItem(ADMIN_ORDERS_KEY) || "[]");
-  orders.unshift(orderData);
-  localStorage.setItem(ADMIN_ORDERS_KEY, JSON.stringify(orders));
+  return apiRequest("/orders", { method: "POST", body: orderData });
 }
 
-// Log contact message into localStorage
+// Save a contact message to the backend
 function saveContactMessage(msgData) {
-  initializeAdminData();
-  const msgs = JSON.parse(localStorage.getItem(ADMIN_MESSAGES_KEY) || "[]");
-  msgs.unshift(msgData);
-  localStorage.setItem(ADMIN_MESSAGES_KEY, JSON.stringify(msgs));
+  return apiRequest("/contact", { method: "POST", body: msgData });
 }
 
-// Log repair booking into localStorage
+// Save a repair booking to the backend
 function saveRepairBooking(repairData) {
-  initializeAdminData();
-  const repairs = JSON.parse(localStorage.getItem(ADMIN_REPAIRS_KEY) || "[]");
-  repairs.unshift(repairData);
-  localStorage.setItem(ADMIN_REPAIRS_KEY, JSON.stringify(repairs));
+  return apiRequest("/repairs", { method: "POST", body: repairData });
 }
 
 // Dashboard rendering controller
-function setupAdminDashboard() {
+async function setupAdminDashboard() {
   if (!document.getElementById("adminDashboardView")) return;
 
   // Route protection
@@ -70,10 +67,20 @@ function setupAdminDashboard() {
     return;
   }
 
-  initializeAdminData();
-  renderAdminMetrics();
   renderAdminLaptopPricingTable();
   renderAdminDeletedLaptopsTable();
+
+  try {
+    [adminOrders, adminMessages, adminRepairs] = await Promise.all([
+      apiRequest("/orders"),
+      apiRequest("/contact"),
+      apiRequest("/repairs")
+    ]);
+  } catch (e) {
+    alert("Could not reach the backend. Make sure it is running (cd backend && npm start).");
+  }
+
+  renderAdminMetrics();
   renderAdminOrdersTable();
   renderAdminMessagesTable();
   renderAdminRepairsTable();
@@ -81,37 +88,22 @@ function setupAdminDashboard() {
 
 /**
  * Laptop Pricing, Discount & Catalogue Management
- * Overrides/deletions are stored in localStorage and applied by js/data.js on every page
- * load, so a change here is immediately live on the home page, catalogue, cart and
- * checkout for any visitor on this browser.
+ * Every change is saved to MongoDB, so it is live on the home page, catalogue, cart and
+ * checkout for every visitor.
  */
-const PRICE_OVERRIDES_KEY = "technest_price_overrides";
-const DELETED_LAPTOPS_KEY = "technest_deleted_laptops";
-const IMAGE_OVERRIDES_KEY = "technest_image_overrides";
-const CUSTOM_LAPTOPS_KEY = "technest_custom_laptops";
 const ADMIN_IMG_PLACEHOLDER = "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=100&q=60";
 
-function getPriceOverrides() {
-  try {
-    return JSON.parse(localStorage.getItem(PRICE_OVERRIDES_KEY) || "{}");
-  } catch (e) {
-    return {};
-  }
-}
-
-function getCustomLaptops() {
-  try {
-    return JSON.parse(localStorage.getItem(CUSTOM_LAPTOPS_KEY) || "[]");
-  } catch (e) {
-    return [];
-  }
+// Save fields of a laptop to the backend and mirror them onto the in-memory copy
+async function updateLaptopInStore(laptopId, fields) {
+  const updated = fromApiProduct(await apiRequest(`/laptops/${laptopId}`, { method: "PATCH", body: fields }));
+  const laptop = LAPTOPS.find(l => l.id === laptopId);
+  if (laptop) Object.assign(laptop, updated);
+  return updated;
 }
 
 /**
  * Add a brand-new laptop from the "Add New Laptop" form.
- * It gets an id >= 1000 (so it never collides with the seed catalogue), is saved to
- * localStorage so js/data.js includes it on every page from now on, and its image is
- * fetched through the same Unsplash API pipeline used for every other laptop.
+ * The backend gives it an id >= 1000 (so it never collides with the seed catalogue).
  */
 function addNewLaptopToStore(event) {
   event.preventDefault();
@@ -132,11 +124,7 @@ function addNewLaptopToStore(event) {
     return;
   }
 
-  const customLaptops = getCustomLaptops();
-  const nextId = 1000 + customLaptops.reduce((max, l) => Math.max(max, l.id - 1000 + 1), 0);
-
   const newLaptop = {
-    id: nextId,
     name,
     brand,
     processor,
@@ -156,32 +144,19 @@ function addNewLaptopToStore(event) {
     description: val("description") || `${brand} ${name} — the newest addition to the TechNest lineup.`
   };
 
-  const finish = (imageUrl) => {
-    customLaptops.push(newLaptop);
-    localStorage.setItem(CUSTOM_LAPTOPS_KEY, JSON.stringify(customLaptops));
-
-    // Reflect immediately on this page too
-    if (!LAPTOPS.find(l => l.id === newLaptop.id)) LAPTOPS.push(newLaptop);
-
-    let imageSaved = true;
-    if (imageUrl) {
-      const overrides = getImageOverrides();
-      overrides[newLaptop.id] = imageUrl;
-      try {
-        localStorage.setItem(IMAGE_OVERRIDES_KEY, JSON.stringify(overrides));
-        newLaptop.apiImage = imageUrl;
-      } catch (e) {
-        imageSaved = false;
-      }
+  const finish = async (imageUrl) => {
+    if (imageUrl) newLaptop.image = imageUrl;
+    try {
+      const saved = fromApiProduct(await apiRequest("/laptops", { method: "POST", body: newLaptop }));
+      LAPTOPS.push(saved);
+      renderAdminLaptopPricingTable();
+      form.reset();
+      const prev = document.getElementById("newLapPrevImg");
+      if (prev && prev.dataset.default) prev.src = prev.dataset.default;
+      showToastNotification(`"${saved.name}" added — now live on the home page, catalogue and 3D viewer.`);
+    } catch (e) {
+      alert(`Couldn't add the laptop: ${e.message}`);
     }
-
-    renderAdminLaptopPricingTable();
-    form.reset();
-    const prev = document.getElementById("newLapPrevImg");
-    if (prev && prev.dataset.default) prev.src = prev.dataset.default;
-    showToastNotification(imageSaved
-      ? `"${newLaptop.name}" added with its image — now live on the home page, catalogue and 3D viewer.`
-      : `"${newLaptop.name}" added, but the image was too large for browser storage — try a smaller photo.`);
   };
 
   const file = form.querySelector('[name="imageFile"]')?.files?.[0];
@@ -197,18 +172,10 @@ function addNewLaptopToStore(event) {
   }
 }
 
-function getImageOverrides() {
-  try {
-    return JSON.parse(localStorage.getItem(IMAGE_OVERRIDES_KEY) || "{}");
-  } catch (e) {
-    return {};
-  }
-}
-
 // Set a laptop's image by pasting a URL (e.g. a direct link to a product photo)
 function setLaptopImageFromUrl(laptopId) {
   const laptop = LAPTOPS.find(l => l.id === laptopId);
-  const current = getImageOverrides()[laptopId] || "";
+  const current = (laptop && laptop.image) || "";
   const url = prompt(`Paste an image URL for "${laptop ? laptop.name : "this laptop"}":`, current.startsWith("data:") ? "" : current);
   if (url === null) return; // cancelled
   if (!url.trim()) {
@@ -229,7 +196,7 @@ function handleLaptopImageUpload(laptopId, inputEl) {
     return;
   }
   if (file.size > 1.5 * 1024 * 1024) {
-    alert("Please choose an image under 1.5MB — uploaded photos are stored in the browser, which has limited space.");
+    alert("Please choose an image under 1.5MB.");
     inputEl.value = "";
     return;
   }
@@ -239,37 +206,23 @@ function handleLaptopImageUpload(laptopId, inputEl) {
   reader.readAsDataURL(file);
 }
 
-function saveLaptopImageOverride(laptopId, imageUrl) {
-  const overrides = getImageOverrides();
-  overrides[laptopId] = imageUrl;
+async function saveLaptopImageOverride(laptopId, imageUrl) {
   try {
-    localStorage.setItem(IMAGE_OVERRIDES_KEY, JSON.stringify(overrides));
+    const laptop = await updateLaptopInStore(laptopId, { image: imageUrl });
+    renderAdminLaptopPricingTable();
+    showToastNotification(`Image updated for "${laptop.name}" — now live on the storefront.`);
   } catch (e) {
-    alert("Couldn't save this image — the browser's storage may be full. Try a smaller photo or a URL instead.");
-    return;
+    alert(`Couldn't save this image: ${e.message}`);
   }
-
-  const laptop = LAPTOPS.find(l => l.id === laptopId);
-  if (laptop) laptop.apiImage = imageUrl;
-
-  renderAdminLaptopPricingTable();
-  showToastNotification(`Image updated for "${laptop ? laptop.name : "laptop"}" — now live on the storefront.`);
 }
 
-function clearLaptopImageOverride(laptopId) {
-  const overrides = getImageOverrides();
-  delete overrides[laptopId];
-  localStorage.setItem(IMAGE_OVERRIDES_KEY, JSON.stringify(overrides));
-
-  renderAdminLaptopPricingTable();
-  showToastNotification("Custom image removed — back to the default photo.");
-}
-
-function getDeletedLaptopIds() {
+async function clearLaptopImageOverride(laptopId) {
   try {
-    return JSON.parse(localStorage.getItem(DELETED_LAPTOPS_KEY) || "[]");
+    await updateLaptopInStore(laptopId, { image: null });
+    renderAdminLaptopPricingTable();
+    showToastNotification("Custom image removed — back to the default photo.");
   } catch (e) {
-    return [];
+    alert(`Couldn't remove the image: ${e.message}`);
   }
 }
 
@@ -281,7 +234,7 @@ function renderAdminLaptopPricingTable() {
     const discountPct = laptop.originalPrice
       ? Math.max(0, Math.round(((laptop.originalPrice - laptop.price) / laptop.originalPrice) * 100))
       : 0;
-    const hasCustomImage = !!getImageOverrides()[laptop.id];
+    const hasCustomImage = !!laptop.image;
     return `
     <tr>
       <td>
@@ -332,7 +285,7 @@ function renderAdminLaptopPricingTable() {
   }
 }
 
-function deleteLaptopFromStore(laptopId) {
+async function deleteLaptopFromStore(laptopId) {
   const laptop = LAPTOPS.find(l => l.id === laptopId);
   const name = laptop ? laptop.name : "this laptop";
   const isCustom = laptopId >= 1000; // admin-added laptops use ids >= 1000
@@ -343,13 +296,16 @@ function deleteLaptopFromStore(laptopId) {
 
   if (!confirm(confirmMsg)) return;
 
-  if (isCustom) {
-    const remaining = getCustomLaptops().filter(l => l.id !== laptopId);
-    localStorage.setItem(CUSTOM_LAPTOPS_KEY, JSON.stringify(remaining));
-  } else {
-    const deleted = getDeletedLaptopIds();
-    if (!deleted.includes(laptopId)) deleted.push(laptopId);
-    localStorage.setItem(DELETED_LAPTOPS_KEY, JSON.stringify(deleted));
+  try {
+    if (isCustom) {
+      await apiRequest(`/laptops/${laptopId}`, { method: "DELETE" });
+    } else {
+      await apiRequest(`/laptops/${laptopId}`, { method: "PATCH", body: { isActive: false } });
+      if (laptop) LAPTOPS_REMOVED.push({ ...laptop, isActive: false });
+    }
+  } catch (e) {
+    alert(`Couldn't remove the laptop: ${e.message}`);
+    return;
   }
 
   const idx = LAPTOPS.findIndex(l => l.id === laptopId);
@@ -360,22 +316,16 @@ function deleteLaptopFromStore(laptopId) {
   showToastNotification(`"${name}" removed from the storefront.`);
 }
 
-function restoreLaptopToStore(laptopId) {
-  const deleted = getDeletedLaptopIds().filter(id => id !== laptopId);
-  localStorage.setItem(DELETED_LAPTOPS_KEY, JSON.stringify(deleted));
-
-  if (typeof LAPTOPS_SEED !== "undefined" && !LAPTOPS.find(l => l.id === laptopId)) {
-    const seedLaptop = LAPTOPS_SEED.find(l => l.id === laptopId);
-    if (seedLaptop) {
-      const restored = { ...seedLaptop };
-      const override = getPriceOverrides()[laptopId];
-      if (override) {
-        if (typeof override.price === "number") restored.price = override.price;
-        if (typeof override.originalPrice === "number") restored.originalPrice = override.originalPrice;
-      }
-      LAPTOPS.push(restored);
-      LAPTOPS.sort((a, b) => a.id - b.id);
-    }
+async function restoreLaptopToStore(laptopId) {
+  try {
+    const restored = fromApiProduct(await apiRequest(`/laptops/${laptopId}`, { method: "PATCH", body: { isActive: true } }));
+    const idx = LAPTOPS_REMOVED.findIndex(l => l.id === laptopId);
+    if (idx > -1) LAPTOPS_REMOVED.splice(idx, 1);
+    LAPTOPS.push(restored);
+    LAPTOPS.sort((a, b) => a.id - b.id);
+  } catch (e) {
+    alert(`Couldn't restore the laptop: ${e.message}`);
+    return;
   }
 
   renderAdminLaptopPricingTable();
@@ -388,22 +338,12 @@ function renderAdminDeletedLaptopsTable() {
   const container = document.getElementById("adminDeletedLaptopsTableBody");
   if (!container || !section) return;
 
-  const deletedIds = getDeletedLaptopIds();
-  section.style.display = deletedIds.length ? "block" : "none";
-  if (!deletedIds.length || typeof LAPTOPS_SEED === "undefined") {
-    container.innerHTML = "";
-    return;
-  }
-
-  container.innerHTML = deletedIds.map(id => {
-    const laptop = LAPTOPS_SEED.find(l => l.id === id);
-    if (!laptop) return "";
-    return `
+  section.style.display = LAPTOPS_REMOVED.length ? "block" : "none";
+  container.innerHTML = LAPTOPS_REMOVED.map(laptop => `
     <tr>
       <td><strong>${laptop.name}</strong><br><span style="font-size:0.78rem; color:#64748b;">${laptop.brand} • ${laptop.processor}</span></td>
-      <td style="text-align:right;"><button class="btn btn-primary btn-sm" onclick="restoreLaptopToStore(${id})">Restore</button></td>
-    </tr>`;
-  }).join("");
+      <td style="text-align:right;"><button class="btn btn-primary btn-sm" onclick="restoreLaptopToStore(${laptop.id})">Restore</button></td>
+    </tr>`).join("");
 }
 
 // Keeps MRP / Price / Discount % in sync as the admin edits any one of the three fields
@@ -424,14 +364,13 @@ function recomputeAdminPricingRow(laptopId, changedField) {
   }
 }
 
-function saveLaptopPricing(laptopId) {
+async function saveLaptopPricing(laptopId) {
   const mrpEl = document.getElementById(`mrpInput_${laptopId}`);
   const priceEl = document.getElementById(`priceInput_${laptopId}`);
   if (!mrpEl || !priceEl) return;
 
   const newMrp = Math.round(Number(mrpEl.value));
   const newPrice = Math.round(Number(priceEl.value));
-  const laptop = LAPTOPS.find(l => l.id === laptopId);
 
   if (!newPrice || newPrice <= 0) {
     alert("Please enter a valid selling price.");
@@ -442,37 +381,31 @@ function saveLaptopPricing(laptopId) {
     return;
   }
 
-  const overrides = getPriceOverrides();
-  overrides[laptopId] = { price: newPrice, originalPrice: newMrp || newPrice };
-  localStorage.setItem(PRICE_OVERRIDES_KEY, JSON.stringify(overrides));
-
-  // Update the in-memory LAPTOPS array too, so this admin page reflects it instantly
-  if (laptop) {
-    laptop.price = newPrice;
-    laptop.originalPrice = newMrp || newPrice;
+  try {
+    const laptop = await updateLaptopInStore(laptopId, { price: newPrice, originalPrice: newMrp || newPrice });
+    renderAdminLaptopPricingTable();
+    showToastNotification(`Pricing updated for "${laptop.name}" — now live on the storefront.`);
+  } catch (e) {
+    alert(`Couldn't save pricing: ${e.message}`);
   }
-
-  renderAdminLaptopPricingTable();
-  showToastNotification(`Pricing updated for "${laptop ? laptop.name : "laptop"}" — now live on the storefront.`);
 }
 
-function resetLaptopPricing(laptopId) {
-  const overrides = getPriceOverrides();
-  delete overrides[laptopId];
-  localStorage.setItem(PRICE_OVERRIDES_KEY, JSON.stringify(overrides));
-
-  const laptop = LAPTOPS.find(l => l.id === laptopId);
+async function resetLaptopPricing(laptopId) {
   const defaults = (typeof LAPTOPS_DEFAULT_PRICING !== "undefined")
     ? LAPTOPS_DEFAULT_PRICING.find(l => l.id === laptopId)
     : null;
-
-  if (laptop && defaults) {
-    laptop.price = defaults.price;
-    laptop.originalPrice = defaults.originalPrice;
+  if (!defaults) {
+    showToastNotification("This laptop has no default pricing to reset to.");
+    return;
   }
 
-  renderAdminLaptopPricingTable();
-  showToastNotification(`Pricing reset to default for "${laptop ? laptop.name : "laptop"}".`);
+  try {
+    const laptop = await updateLaptopInStore(laptopId, { price: defaults.price, originalPrice: defaults.originalPrice });
+    renderAdminLaptopPricingTable();
+    showToastNotification(`Pricing reset to default for "${laptop.name}".`);
+  } catch (e) {
+    alert(`Couldn't reset pricing: ${e.message}`);
+  }
 }
 
 // Minimal toast helper (admin dashboard doesn't load js/cart.js, which normally provides this)
@@ -492,11 +425,7 @@ if (typeof showToastNotification !== "function") {
 }
 
 function renderAdminMetrics() {
-  const orders = JSON.parse(localStorage.getItem(ADMIN_ORDERS_KEY) || "[]");
-  const msgs = JSON.parse(localStorage.getItem(ADMIN_MESSAGES_KEY) || "[]");
-  const repairs = JSON.parse(localStorage.getItem(ADMIN_REPAIRS_KEY) || "[]");
-
-  const totalRevenue = orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+  const totalRevenue = adminOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
 
   const revEl = document.getElementById("metricTotalRevenue");
   const ordEl = document.getElementById("metricTotalOrders");
@@ -504,19 +433,18 @@ function renderAdminMetrics() {
   const repEl = document.getElementById("metricTotalRepairs");
 
   if (revEl) revEl.textContent = `₹${totalRevenue.toLocaleString("en-IN")}`;
-  if (ordEl) ordEl.textContent = orders.length;
-  if (msgEl) msgEl.textContent = msgs.length;
-  if (repEl) repEl.textContent = repairs.length;
+  if (ordEl) ordEl.textContent = adminOrders.length;
+  if (msgEl) msgEl.textContent = adminMessages.length;
+  if (repEl) repEl.textContent = adminRepairs.length;
 }
 
 function renderAdminOrdersTable() {
   const container = document.getElementById("adminOrdersTableBody");
   if (!container) return;
 
-  const orders = JSON.parse(localStorage.getItem(ADMIN_ORDERS_KEY) || "[]");
   const query = (document.getElementById("adminOrderSearch")?.value || "").toLowerCase();
 
-  const filtered = orders.filter(o =>
+  const filtered = adminOrders.filter(o =>
     o.orderId.toLowerCase().includes(query) ||
     o.customerName.toLowerCase().includes(query) ||
     o.paymentMethod.toLowerCase().includes(query) ||
@@ -539,7 +467,7 @@ function renderAdminOrdersTable() {
       <td><strong>₹${Number(order.totalAmount).toLocaleString("en-IN")}</strong></td>
       <td><span class="pay-method-badge">${order.paymentMethod}</span></td>
       <td>
-        <select onchange="updateOrderStatus('${order.orderId}', this.value)" class="status-select status-${order.status.toLowerCase()}">
+        <select onchange="updateOrderStatus('${order._id}', this.value)" class="status-select status-${order.status.toLowerCase()}">
           <option value="Processing" ${order.status === "Processing" ? "selected" : ""}>Processing</option>
           <option value="Shipped" ${order.status === "Shipped" ? "selected" : ""}>Shipped</option>
           <option value="Delivered" ${order.status === "Delivered" ? "selected" : ""}>Delivered</option>
@@ -547,26 +475,27 @@ function renderAdminOrdersTable() {
         </select>
       </td>
       <td>
-        <button class="btn btn-outline" style="padding: 0.25rem 0.6rem; font-size: 0.8rem;" onclick="viewOrderDetails('${order.orderId}')">View Details</button>
+        <button class="btn btn-outline" style="padding: 0.25rem 0.6rem; font-size: 0.8rem;" onclick="viewOrderDetails('${order._id}')">View Details</button>
       </td>
     </tr>
   `).join("");
 }
 
-function updateOrderStatus(orderId, newStatus) {
-  const orders = JSON.parse(localStorage.getItem(ADMIN_ORDERS_KEY) || "[]");
-  const target = orders.find(o => o.orderId === orderId);
-  if (target) {
-    target.status = newStatus;
-    localStorage.setItem(ADMIN_ORDERS_KEY, JSON.stringify(orders));
+async function updateOrderStatus(id, newStatus) {
+  try {
+    const updated = await apiRequest(`/orders/${id}`, { method: "PATCH", body: { status: newStatus } });
+    const idx = adminOrders.findIndex(o => o._id === id);
+    if (idx > -1) adminOrders[idx] = updated;
     renderAdminOrdersTable();
-    showToastNotification(`Order ${orderId} status updated to ${newStatus}`);
+    showToastNotification(`Order ${updated.orderId} status updated to ${newStatus}`);
+  } catch (e) {
+    alert(`Couldn't update the order: ${e.message}`);
+    renderAdminOrdersTable();
   }
 }
 
-function viewOrderDetails(orderId) {
-  const orders = JSON.parse(localStorage.getItem(ADMIN_ORDERS_KEY) || "[]");
-  const order = orders.find(o => o.orderId === orderId);
+function viewOrderDetails(id) {
+  const order = adminOrders.find(o => o._id === id);
   if (!order) return;
 
   const modal = document.getElementById("adminOrderModal");
@@ -575,13 +504,13 @@ function viewOrderDetails(orderId) {
     content.innerHTML = `
       <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1rem;">
         <h4>Receipt for Order #${order.orderId}</h4>
-        <p style="font-size: 0.85rem; color: #64748b;">Date: ${order.date}</p>
+        <p style="font-size: 0.85rem; color: #64748b;">Date: ${formatAdminDate(order.createdAt)}</p>
       </div>
       <div style="margin-bottom: 1rem;">
         <strong>Customer Info:</strong>
         <p>${order.customerName} (${order.email || "N/A"})</p>
         <p>Phone: ${order.phone}</p>
-        <p><strong>Shipping Address:</strong><br>${order.address}</p>
+        <p><strong>Shipping Address:</strong><br>${formatShippingAddress(order.shippingAddress)}</p>
       </div>
       <div style="margin-bottom: 1rem;">
         <strong>Ordered Items:</strong>
@@ -608,44 +537,45 @@ function renderAdminMessagesTable() {
   const container = document.getElementById("adminMessagesTableBody");
   if (!container) return;
 
-  const msgs = JSON.parse(localStorage.getItem(ADMIN_MESSAGES_KEY) || "[]");
-  if (msgs.length === 0) {
+  if (adminMessages.length === 0) {
     container.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 1.5rem; color: #64748b;">No contact inquiries received yet.</td></tr>`;
     return;
   }
 
-  container.innerHTML = msgs.map(m => `
+  container.innerHTML = adminMessages.map(m => `
     <tr>
-      <td>${m.date}</td>
+      <td>${formatAdminDate(m.createdAt)}</td>
       <td><strong>${m.name}</strong><br><span style="font-size:0.8rem; color:#64748b;">${m.email} | ${m.phone}</span></td>
       <td><strong>${m.subject || "General Inquiry"}</strong></td>
       <td style="max-width: 300px; font-size: 0.85rem;">${m.message}</td>
-      <td><button class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.8rem; color: #ef4444;" onclick="deleteAdminMessage('${m.id}')">Delete</button></td>
+      <td><button class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.8rem; color: #ef4444;" onclick="deleteAdminMessage('${m._id}')">Delete</button></td>
     </tr>
   `).join("");
 }
 
-function deleteAdminMessage(id) {
-  let msgs = JSON.parse(localStorage.getItem(ADMIN_MESSAGES_KEY) || "[]");
-  msgs = msgs.filter(m => m.id !== id);
-  localStorage.setItem(ADMIN_MESSAGES_KEY, JSON.stringify(msgs));
-  renderAdminMessagesTable();
-  renderAdminMetrics();
+async function deleteAdminMessage(id) {
+  try {
+    await apiRequest(`/contact/${id}`, { method: "DELETE" });
+    adminMessages = adminMessages.filter(m => m._id !== id);
+    renderAdminMessagesTable();
+    renderAdminMetrics();
+  } catch (e) {
+    alert(`Couldn't delete the message: ${e.message}`);
+  }
 }
 
 function renderAdminRepairsTable() {
   const container = document.getElementById("adminRepairsTableBody");
   if (!container) return;
 
-  const repairs = JSON.parse(localStorage.getItem(ADMIN_REPAIRS_KEY) || "[]");
-  if (repairs.length === 0) {
+  if (adminRepairs.length === 0) {
     container.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 1.5rem; color: #64748b;">No laptop repair service bookings yet.</td></tr>`;
     return;
   }
 
-  container.innerHTML = repairs.map(r => `
+  container.innerHTML = adminRepairs.map(r => `
     <tr>
-      <td>${r.date}</td>
+      <td>${formatAdminDate(r.createdAt)}</td>
       <td><strong>${r.name}</strong><br><span style="font-size:0.8rem; color:#64748b;">${r.phone}</span></td>
       <td><span class="pay-method-badge" style="background:#e0f2fe; color:#0369a1;">${r.laptopModel}</span></td>
       <td><strong>${r.issueType}</strong></td>
@@ -654,15 +584,21 @@ function renderAdminRepairsTable() {
   `).join("");
 }
 
-function clearAllAdminResponses() {
-  if (confirm("Are you sure you want to clear all saved customer orders, messages, and repair responses?")) {
-    localStorage.removeItem(ADMIN_ORDERS_KEY);
-    localStorage.removeItem(ADMIN_MESSAGES_KEY);
-    localStorage.removeItem(ADMIN_REPAIRS_KEY);
-    initializeAdminData();
-    setupAdminDashboard();
-    showToastNotification("All customer responses cleared.");
+// Permanently deletes every order, contact message and repair booking from the database
+async function clearAllAdminResponses() {
+  if (!confirm("Permanently delete ALL customer orders, contact messages and repair bookings from the database? This cannot be undone.")) return;
+
+  try {
+    await Promise.all([
+      ...adminOrders.map(o => apiRequest(`/orders/${o._id}`, { method: "DELETE" })),
+      ...adminMessages.map(m => apiRequest(`/contact/${m._id}`, { method: "DELETE" })),
+      ...adminRepairs.map(r => apiRequest(`/repairs/${r._id}`, { method: "DELETE" }))
+    ]);
+    showToastNotification("All customer responses deleted.");
+  } catch (e) {
+    alert(`Some records couldn't be deleted: ${e.message}`);
   }
+  setupAdminDashboard();
 }
 
 document.addEventListener("DOMContentLoaded", () => {

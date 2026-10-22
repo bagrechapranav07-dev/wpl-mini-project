@@ -3,7 +3,8 @@ const addressSchema = require("./Address");
 
 const orderItemSchema = new mongoose.Schema(
   {
-    product: { type: mongoose.Schema.Types.ObjectId, required: true, refPath: "items.productType" },
+    product: { type: mongoose.Schema.Types.ObjectId, refPath: "items.productType" },
+    productId: { type: Number }, // storefront numeric id
     productType: { type: String, required: true, enum: ["Laptop", "Accessory"] },
     name: { type: String, required: true },   // snapshot at time of purchase
     price: { type: Number, required: true },  // snapshot at time of purchase

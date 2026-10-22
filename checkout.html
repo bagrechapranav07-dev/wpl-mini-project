@@ -10,7 +10,6 @@
 </head>
 
 <body>
-  <a class="skip-link" href="#main-content">Skip to main content</a>
 
   <!-- Checkout Header -->
   <header class="checkout-header">
@@ -25,7 +24,7 @@
     </div>
   </header>
 
-  <main class="container" id="main-content" tabindex="-1" style="margin-bottom:3rem; margin-top:0.5rem;">
+  <main class="container" style="margin-bottom:3rem; margin-top:0.5rem;">
     <div class="checkout-grid">
 
       <!-- Left: Address & Payment -->
@@ -42,40 +41,37 @@
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
               <div class="form-group">
                 <label>Full Name *</label>
-                <input type="text" id="custName" class="form-control" required placeholder="e.g. Aniket Sharma"
-                  value="Aniket Sharma">
+                <input type="text" id="custName" class="form-control" required placeholder="Your full name">
               </div>
               <div class="form-group">
                 <label>Mobile Number *</label>
-                <input type="tel" id="custPhone" class="form-control" required placeholder="+91 98765 43210"
-                  value="+91 98765 43210">
+                <input type="tel" id="custPhone" class="form-control" required placeholder="10-digit mobile number">
               </div>
             </div>
 
             <div class="form-group">
               <label>Email Address *</label>
-              <input type="email" id="custEmail" class="form-control" required placeholder="email@example.com"
-                value="aniket@example.com">
+              <input type="email" id="custEmail" class="form-control" required placeholder="Your email address">
             </div>
 
             <div class="form-group">
               <label>Flat, House No., Building, Street *</label>
               <input type="text" id="custAddress" class="form-control" required
-                placeholder="e.g. 402 Sunshine Towers, MG Road" value="Flat 402, Sunshine Towers, MG Road">
+                placeholder="Flat / house no., building, street">
             </div>
 
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem;">
               <div class="form-group">
                 <label>City *</label>
-                <input type="text" id="custCity" class="form-control" required value="Bengaluru">
+                <input type="text" id="custCity" class="form-control" required placeholder="City">
               </div>
               <div class="form-group">
                 <label>State *</label>
-                <input type="text" id="custState" class="form-control" required value="Karnataka">
+                <input type="text" id="custState" class="form-control" required placeholder="State">
               </div>
               <div class="form-group">
                 <label>Pincode *</label>
-                <input type="text" id="custPincode" class="form-control" required value="560001">
+                <input type="text" id="custPincode" class="form-control" required placeholder="6-digit pincode">
               </div>
             </div>
 
@@ -283,10 +279,11 @@
     </div>
   </div>
 
-  <script src="js/data.js?v=3"></script>
-  <script src="js/api-images.js?v=4"></script>
+  <script src="js/api.js?v=1"></script>
+  <script src="js/data.js?v=4"></script>
+  <script src="js/api-images.js?v=9"></script>
   <script src="js/cart.js?v=2"></script>
-  <script src="js/admin.js?v=4"></script>
+  <script src="js/admin.js?v=6"></script>
   <script>
     function goToPaymentStep() {
       const addressForm = document.getElementById('checkoutAddressForm');
@@ -357,7 +354,7 @@
       document.getElementById('paymentOtpModal').style.display = 'flex';
     }
 
-    function verifyOtpAndCompleteOrder() {
+    async function verifyOtpAndCompleteOrder() {
       const otpInput = document.getElementById('otpCodeInput')?.value || '';
       if (otpInput.trim() !== '123456') {
         alert('Please enter the demo OTP: 123456');
@@ -369,32 +366,47 @@
       const custName = document.getElementById('custName')?.value || 'Valued Customer';
       const custPhone = document.getElementById('custPhone')?.value || '';
       const custEmail = document.getElementById('custEmail')?.value || '';
-      const custAddress = (document.getElementById('custAddress')?.value || '') + ', ' +
-        (document.getElementById('custCity')?.value || '') + ' - ' +
-        (document.getElementById('custPincode')?.value || '');
+      const shippingAddress = {
+        fullName: custName,
+        phone: custPhone,
+        address: document.getElementById('custAddress')?.value || '',
+        city: document.getElementById('custCity')?.value || '',
+        state: document.getElementById('custState')?.value || '',
+        pincode: document.getElementById('custPincode')?.value || ''
+      };
       const selectedRadio = document.querySelector('input[name="payMethod"]:checked');
       const payMethod = selectedRadio ? selectedRadio.value : 'UPI';
 
       const newOrder = {
         orderId: 'TN-' + Math.floor(100000 + Math.random() * 900000),
-        date: new Date().toLocaleString('en-IN'),
         customerName: custName,
         email: custEmail,
         phone: custPhone,
-        address: custAddress,
-        items: items.map(i => ({ name: i.name, qty: i.quantity, price: i.price })),
+        shippingAddress,
+        items: items.map(i => ({
+          productId: i.id,
+          productType: i.type === 'laptop' ? 'Laptop' : 'Accessory',
+          name: i.name,
+          qty: i.quantity,
+          price: i.price
+        })),
         paymentMethod: payMethod,
         totalAmount: totals.grandTotal,
-        status: 'Processing',
         notes: 'TechNest Verified Transaction'
       };
 
-      if (typeof saveCustomerOrder === 'function') saveCustomerOrder(newOrder);
+      let savedOrder;
+      try {
+        savedOrder = await saveCustomerOrder(newOrder);
+      } catch (err) {
+        alert('Sorry, we could not place your order right now. Your cart has been kept.\n\n' + err.message);
+        return;
+      }
 
       document.getElementById('paymentOtpModal').style.display = 'none';
 
       document.getElementById('receiptOrderId').textContent = newOrder.orderId;
-      document.getElementById('receiptDate').textContent = newOrder.date;
+      document.getElementById('receiptDate').textContent = new Date(savedOrder.createdAt).toLocaleString('en-IN');
       document.getElementById('receiptCustomerName').textContent = custName;
       document.getElementById('receiptPaymentMode').textContent = payMethod;
       document.getElementById('receiptTotalAmount').textContent = `₹${totals.grandTotal.toLocaleString('en-IN')}`;

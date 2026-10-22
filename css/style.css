@@ -69,20 +69,6 @@ a { color: inherit; text-decoration: none; }
 img { max-width: 100%; height: auto; display: block; }
 ul { list-style: none; }
 
-.skip-link {
-  position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
-  z-index: 1000;
-  padding: 0.75rem 1rem;
-  color: white;
-  background: var(--dark-800);
-  border-radius: var(--radius-sm);
-  transform: translateY(-160%);
-}
-
-.skip-link:focus { transform: translateY(0); }
-
 /* ── Layout ──────────────────────────────────────────────────────────────── */
 .container {
   width: 92%;
@@ -1483,6 +1469,11 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 .v3d-close { position: absolute; top: 10px; right: 14px; background: none; border: 0; color: #fff; font-size: 2rem; cursor: pointer; line-height: 1; }
 .v3d-stage { height: 400px; perspective: 1600px; display: flex; align-items: center; justify-content: center; cursor: grab; touch-action: none; overflow: hidden; }
 .v3d-stage:active { cursor: grabbing; }
+.v3d-mstage { position: relative; }
+.v3d-gl { position: absolute; inset: 0; display: none; }
+.v3d-gl canvas { width: 100%; height: 100%; display: block; }
+.v3d-mstage.gl-on .v3d-gl { display: block; }
+.v3d-mstage.gl-on .v3d-laptop { display: none; }
 .v3d-laptop { margin-top: -110px; transition: none; transform-origin: center 55%; }
 .v3d-controls { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; align-items: center; margin-top: 0.5rem; }
 .v3d-btn { padding: 0.5rem 1rem; border-radius: 999px; border: 1px solid #475569; background: transparent; color: #fff; font-weight: 600; cursor: pointer; }
