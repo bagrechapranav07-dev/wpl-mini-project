@@ -8,74 +8,12 @@ const ADMIN_ORDERS_KEY = "technest_admin_orders";
 const ADMIN_MESSAGES_KEY = "technest_admin_messages";
 const ADMIN_REPAIRS_KEY = "technest_admin_repairs";
 
-// Default seed data if empty
-function initializeAdminSeedData() {
-  if (!localStorage.getItem(ADMIN_ORDERS_KEY)) {
-    const seedOrders = [
-      {
-        orderId: "TN-894201",
-        date: "2026-09-17 14:32",
-        customerName: "Rahul Sharma",
-        email: "rahul.sharma@example.com",
-        phone: "+91 98765 12345",
-        address: "Flat 402, Sunshine Apartments, Indiranagar, Bengaluru, Karnataka - 560038",
-        items: [
-          { name: "Apple MacBook Air M2", qty: 1, price: 84900 },
-          { name: "USB-C Multiport Hub", qty: 1, price: 1299 }
-        ],
-        paymentMethod: "Amazon Pay UPI",
-        totalAmount: 86199,
-        status: "Delivered",
-        notes: "Paid via Amazon Pay UPI ID rahul@okaxis"
-      },
-      {
-        orderId: "TN-894202",
-        date: "2026-09-17 15:05",
-        customerName: "Priya Patel",
-        email: "priya.patel@example.com",
-        phone: "+91 99887 65432",
-        address: "Plot 14, Sector 18, Cyber City, Gurugram, Haryana - 122002",
-        items: [
-          { name: "ASUS ROG Strix G16 Gaming", qty: 1, price: 114990 }
-        ],
-        paymentMethod: "Credit Card (HDFC)",
-        totalAmount: 114990,
-        status: "Processing",
-        notes: "Card Ending **** 4892"
-      }
-    ];
-    localStorage.setItem(ADMIN_ORDERS_KEY, JSON.stringify(seedOrders));
-  }
-
-  if (!localStorage.getItem(ADMIN_MESSAGES_KEY)) {
-    const seedMessages = [
-      {
-        id: "MSG-101",
-        date: "2026-09-16 11:20",
-        name: "Amit Kumar",
-        email: "amit.k@example.com",
-        phone: "+91 98112 34567",
-        subject: "Bulk Laptop Purchase for Startup",
-        message: "Hi TechNest, we require 10 Lenovo ThinkPad laptops for our tech team. Please send a price quotation."
-      }
-    ];
-    localStorage.setItem(ADMIN_MESSAGES_KEY, JSON.stringify(seedMessages));
-  }
-
-  if (!localStorage.getItem(ADMIN_REPAIRS_KEY)) {
-    const seedRepairs = [
-      {
-        id: "REP-201",
-        date: "2026-09-17 10:15",
-        name: "Vikram Singh",
-        phone: "+91 97654 32109",
-        laptopModel: "Dell Inspiron 15 5000",
-        issueType: "Screen Replacement & Battery Drain",
-        description: "Display panel has blue flickering lines and battery dies within 20 minutes."
-      }
-    ];
-    localStorage.setItem(ADMIN_REPAIRS_KEY, JSON.stringify(seedRepairs));
-  }
+function initializeAdminData() {
+  [ADMIN_ORDERS_KEY, ADMIN_MESSAGES_KEY, ADMIN_REPAIRS_KEY].forEach(key => {
+    if (!localStorage.getItem(key)) {
+      localStorage.setItem(key, "[]");
+    }
+  });
 }
 
 // Check admin authentication
@@ -100,7 +38,7 @@ function performAdminLogout() {
 
 // Log a new customer order into localStorage
 function saveCustomerOrder(orderData) {
-  initializeAdminSeedData();
+  initializeAdminData();
   const orders = JSON.parse(localStorage.getItem(ADMIN_ORDERS_KEY) || "[]");
   orders.unshift(orderData);
   localStorage.setItem(ADMIN_ORDERS_KEY, JSON.stringify(orders));
@@ -108,7 +46,7 @@ function saveCustomerOrder(orderData) {
 
 // Log contact message into localStorage
 function saveContactMessage(msgData) {
-  initializeAdminSeedData();
+  initializeAdminData();
   const msgs = JSON.parse(localStorage.getItem(ADMIN_MESSAGES_KEY) || "[]");
   msgs.unshift(msgData);
   localStorage.setItem(ADMIN_MESSAGES_KEY, JSON.stringify(msgs));
@@ -116,7 +54,7 @@ function saveContactMessage(msgData) {
 
 // Log repair booking into localStorage
 function saveRepairBooking(repairData) {
-  initializeAdminSeedData();
+  initializeAdminData();
   const repairs = JSON.parse(localStorage.getItem(ADMIN_REPAIRS_KEY) || "[]");
   repairs.unshift(repairData);
   localStorage.setItem(ADMIN_REPAIRS_KEY, JSON.stringify(repairs));
@@ -132,7 +70,7 @@ function setupAdminDashboard() {
     return;
   }
 
-  initializeAdminSeedData();
+  initializeAdminData();
   renderAdminMetrics();
   renderAdminLaptopPricingTable();
   renderAdminDeletedLaptopsTable();
@@ -717,13 +655,13 @@ function renderAdminRepairsTable() {
 }
 
 function clearAllAdminResponses() {
-  if (confirm("Are you sure you want to reset all test customer orders, messages, and repair responses?")) {
+  if (confirm("Are you sure you want to clear all saved customer orders, messages, and repair responses?")) {
     localStorage.removeItem(ADMIN_ORDERS_KEY);
     localStorage.removeItem(ADMIN_MESSAGES_KEY);
     localStorage.removeItem(ADMIN_REPAIRS_KEY);
-    initializeAdminSeedData();
+    initializeAdminData();
     setupAdminDashboard();
-    showToastNotification("All responses reset to initial demo state!");
+    showToastNotification("All customer responses cleared.");
   }
 }
 
